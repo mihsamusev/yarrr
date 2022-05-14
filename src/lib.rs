@@ -1,79 +1,9 @@
-use derive_more::{Add, AddAssign, Sub, SubAssign};
-use std::ops;
+pub mod image;
+pub mod linalg;
+pub mod ray;
 
-#[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Default, Add, AddAssign, Sub, SubAssign)]
-pub struct Vector3D {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
-}
-
-impl ops::Index<usize> for Vector3D {
-    type Output = f32;
-    #[inline]
-    fn index(&self, index: usize) -> &Self::Output {
-        match index {
-            0 => &self.x,
-            1 => &self.y,
-            2 => &self.z,
-            _ => panic!(),
-        }
-    }
-}
-
-impl ops::Mul<f32> for Vector3D {
-    type Output = Self;
-    #[inline]
-    fn mul(self, rhs: f32) -> Self::Output {
-        Self {
-            x: rhs * self.x,
-            y: rhs * self.y,
-            z: rhs * self.z,
-        }
-    }
-}
-
-impl ops::MulAssign<f32> for Vector3D {
-    #[inline]
-    fn mul_assign(&mut self, rhs: f32) {
-        self.x *= rhs;
-        self.y *= rhs;
-        self.z *= rhs;
-    }
-}
-
-impl Vector3D {
-    pub fn new(x: f32, y: f32, z: f32) -> Self {
-        Self { x, y, z }
-    }
-
-    #[inline]
-    pub fn norm(&self) -> f32 {
-        self.norm_squared().sqrt()
-    }
-
-    #[inline]
-    pub fn norm_squared(&self) -> f32 {
-        self.x * self.x + self.y * self.y + self.z * self.z
-    }
-
-    #[inline]
-    pub fn unit(self) -> Self {
-        let scale = 1.0 / self.norm();
-        self * scale
-    }
-
-    #[inline]
-    pub fn dot(&self, other: &Self) -> f32 {
-        self.x * other.x + self.y * other.y + self.z * other.z
-    }
-
-    #[inline]
-    pub fn cross(&self, &other: &Self) -> Self {
-        Self {
-            x: self.y * other.z - self.z * other.y,
-            y: self.z * other.x - self.x * other.z,
-            z: self.x * other.y - self.y * other.x,
-        }
-    }
+pub mod prelude {
+    pub use crate::image::*;
+    pub use crate::linalg::*;
+    pub use crate::ray::*;
 }

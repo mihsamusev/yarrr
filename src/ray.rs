@@ -1,4 +1,4 @@
-use crate::linalg::Vector3D;
+use crate::prelude::*;
 
 #[derive(Debug)]
 pub struct Ray {
@@ -18,15 +18,20 @@ impl Ray {
     pub fn at(&self, t: f32) -> Vector3D {
         self.origin + self.direction * t
     }
-}
 
-pub fn ray_color_blue_grad(ray: &Ray) -> Vector3D {
-    let t = 0.5 * ray.direction.y + 1.0;
-    Vector3D::new(1.0, 1.0, 1.0) * (1.0 - t) + Vector3D::new(0.5, 0.7, 1.0) * t
-}
-
-pub fn ray_color_3d_grad(ray: &Ray) -> Vector3D {
-    let tx = ray.direction.x;
-    let ty = ray.direction.y;
-    Vector3D::new(tx, ty, 0.25).unit()
+    pub fn intesect(&self, sphere: &Sphere) -> Option<f32> {
+        let sphere_dir = self.origin - sphere.center;
+        // components of quadratic eq
+        let a = self.direction.norm_squared();
+        let half_b = sphere_dir.dot(&self.direction);
+        let c = sphere_dir.norm_squared() - sphere.radius * sphere.radius;
+        let discriminant = half_b * half_b - a * c;
+        if discriminant < 0.0 {
+            None
+        } else {
+            // closest intersection
+            let t = (-half_b - discriminant.sqrt()) / a;
+            Some(t)
+        }
+    }
 }

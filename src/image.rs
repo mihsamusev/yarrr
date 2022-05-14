@@ -1,6 +1,4 @@
-use crate::linalg::Vector3D;
 use crate::prelude::*;
-use crate::ray::Ray;
 use indicatif::ProgressBar;
 type RgbColor = Vector3D;
 
@@ -60,17 +58,38 @@ pub fn print_ppm(image: Image) {
     bar.finish();
 }
 
-pub fn print_ppm_ray(image: Image, camera: Camera) {
+pub fn ray_color_blue_grad(ray: &Ray) -> Vector3D {
+    let t = 0.5 * (ray.direction.y + 1.0);
+    Vector3D::new(1.0, 1.0, 1.0) * (1.0 - t) + Vector3D::new(0.5, 0.7, 1.0) * t
+}
+
+pub fn ray_color_3d_grad(ray: &Ray) -> Vector3D {
+    let tx = ray.direction.x;
+    let ty = ray.direction.y;
+    Vector3D::new(tx, ty, 0.25).unit()
+}
+
+pub fn ray_color_with_sphere(ray: &Ray, sphere: &Sphere) -> RgbColor {
+    if let Some(t) = ray.intesect(sphere) {
+        let normal = (ray.at(t) - sphere.center).unit();
+        (normal + Vector3D::new(1.0, 1.0, 1.0)) * 0.5
+    } else {
+        let k = 0.5 * (ray.direction.y + 1.0);
+        RgbColor::new(1.0, 1.0, 1.0) * (1.0 - k) + RgbColor::new(0.5, 0.7, 1.0) * k
+    }
+}
+
+pub fn print_ppm_ray(image: Image, camera: Camera, sphere: Sphere) {
     // header
     println!("P3\n{} {}\n255", image.width, image.height);
 
     // scanlines
-    for row in 0..image.height {
+    for row in (0..image.height).rev() {
         for col in 0..image.width {
             let u = col as f32 / (image.width - 1) as f32;
             let v = row as f32 / (image.height - 1) as f32;
             let ray = camera.ray_from_uv(u, v);
-            let col = ray_color_3d_grad(&ray);
+            let col = ray_color_with_sphere(&ray, &sphere);
             print!("{}", to_string(&col));
         }
         println!();

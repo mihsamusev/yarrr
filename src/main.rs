@@ -8,7 +8,9 @@ fn main() -> Result<(), Error> {
     let im = Image::new(width, height);
     let vp = Viewport::new(2.0, aspect_ratio);
     let cam = Camera::new(vp, 1.0);
-    print_ppm_ray(im, cam);
+
+    let sphere = Sphere::new(Vector3D::new(0.0, 0.0, -1.0), 0.5);
+    print_ppm_ray(im, cam, sphere);
     //print_ppm(im);
     Ok(())
 }

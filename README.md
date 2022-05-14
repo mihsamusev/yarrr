@@ -16,9 +16,15 @@ Progress:
 - [x] Vector math in 3D
 - [x] Basic PPM image format writer
 - [ ] Rays
-- [ ] Camera & Scene
-- [ ] Adding sphere objects
+  - [x] intersection with sphere
+  - [ ] bounce
+- [x] Camera & Scene
+- [x] Adding sphere objects
+
+Milestone 1: 1 sphere with simple normal based lighting
+![](doc/level1.ppm)
 
 Todos:
 
 - how to avoid mistakes where Vector3D / Point3D / Ray can be any float but color either 0.0-1.0 or 0-255 without rewritting too much code, reusing Vector3D
+- how to make sure if `vec_a` _ b is implemented we get b _ `vec_a` automatically?

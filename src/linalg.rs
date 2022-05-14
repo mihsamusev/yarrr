@@ -1,8 +1,8 @@
-use derive_more::{Add, AddAssign, Neg, Sub, SubAssign};
+use derive_more::{Add, AddAssign, Div, Neg, Sub, SubAssign};
 use std::ops;
 
 #[derive(
-    Debug, Copy, Clone, PartialEq, PartialOrd, Default, Add, AddAssign, Sub, SubAssign, Neg,
+    Debug, Copy, Clone, PartialEq, PartialOrd, Default, Add, AddAssign, Sub, SubAssign, Neg, Div,
 )]
 pub struct Vector3D {
     pub x: f32,

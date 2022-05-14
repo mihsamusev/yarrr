@@ -69,17 +69,25 @@ pub fn ray_color_3d_grad(ray: &Ray) -> Vector3D {
     Vector3D::new(tx, ty, 0.25).unit()
 }
 
-pub fn ray_color_with_sphere(ray: &Ray, sphere: &Sphere) -> RgbColor {
-    if let Some(t) = ray.intesect(sphere) {
-        let normal = (ray.at(t) - sphere.center).unit();
-        (normal + Vector3D::new(1.0, 1.0, 1.0)) * 0.5
+pub fn ray_color_with_sphere<T: Hittable>(ray: &Ray, body: &T) -> RgbColor {
+    if let Some(hitdata) = body.hit(ray, 0.0, f32::MAX) {
+        (hitdata.normal + Vector3D::new(1.0, 1.0, 1.0)) * 0.5
     } else {
         let k = 0.5 * (ray.direction.y + 1.0);
         RgbColor::new(1.0, 1.0, 1.0) * (1.0 - k) + RgbColor::new(0.5, 0.7, 1.0) * k
     }
 }
 
-pub fn print_ppm_ray(image: Image, camera: Camera, sphere: Sphere) {
+pub fn color_from_world<T: Hittable>(ray: &Ray, world: &[T]) -> RgbColor {
+    if let Some(hitdata) = hit_all(world, ray, 0.0, f32::MAX) {
+        (hitdata.normal + Vector3D::new(1.0, 1.0, 1.0)) * 0.5
+    } else {
+        let k = 0.5 * (ray.direction.y + 1.0);
+        RgbColor::new(1.0, 1.0, 1.0) * (1.0 - k) + RgbColor::new(0.5, 0.7, 1.0) * k
+    }
+}
+
+pub fn print_ppm_ray<T: Hittable>(image: Image, camera: Camera, world: &[T]) {
     // header
     println!("P3\n{} {}\n255", image.width, image.height);
 
@@ -89,7 +97,7 @@ pub fn print_ppm_ray(image: Image, camera: Camera, sphere: Sphere) {
             let u = col as f32 / (image.width - 1) as f32;
             let v = row as f32 / (image.height - 1) as f32;
             let ray = camera.ray_from_uv(u, v);
-            let col = ray_color_with_sphere(&ray, &sphere);
+            let col = color_from_world(&ray, world);
             print!("{}", to_string(&col));
         }
         println!();

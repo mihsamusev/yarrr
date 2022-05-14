@@ -22,7 +22,7 @@ Progress:
 - [x] Adding sphere objects
 
 Milestone 1: 1 sphere with simple normal based lighting
-![](doc/level1.ppm)
+![](/doc/level1.ppm)
 
 Todos:
 

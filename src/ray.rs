@@ -18,20 +18,34 @@ impl Ray {
     pub fn at(&self, t: f32) -> Vector3D {
         self.origin + self.direction * t
     }
+}
 
-    pub fn intesect(&self, sphere: &Sphere) -> Option<f32> {
-        let sphere_dir = self.origin - sphere.center;
-        // components of quadratic eq
-        let a = self.direction.norm_squared();
-        let half_b = sphere_dir.dot(&self.direction);
-        let c = sphere_dir.norm_squared() - sphere.radius * sphere.radius;
-        let discriminant = half_b * half_b - a * c;
-        if discriminant < 0.0 {
-            None
-        } else {
-            // closest intersection
-            let t = (-half_b - discriminant.sqrt()) / a;
-            Some(t)
+pub struct HitRecord {
+    pub point: Vector3D,
+    pub t: f32,
+    pub normal: Vector3D,
+    pub is_front_face: bool,
+}
+
+impl HitRecord {
+    pub fn new(point: Vector3D, t: f32, normal: Vector3D) -> Self {
+        Self {
+            point,
+            t,
+            normal,
+            is_front_face: true,
         }
     }
+
+    #[inline]
+    pub fn set_ray_facing_normal(&mut self, ray: &Ray) {
+        self.is_front_face = ray.direction.dot(&self.normal) < 0.0;
+        if !self.is_front_face {
+            self.normal = -self.normal;
+        }
+    }
+}
+
+pub trait Hittable {
+    fn hit(&self, ray: &Ray, t_min: f32, f_max: f32) -> Option<HitRecord>;
 }

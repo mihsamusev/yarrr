@@ -1,5 +1,7 @@
 use crate::prelude::*;
 use indicatif::ProgressBar;
+use rand::Rng;
+
 type RgbColor = Vector3D;
 
 fn to_string(vec: &RgbColor) -> String {
@@ -16,7 +18,6 @@ pub struct Image {
 }
 
 impl Image {
-    //pub fn new(width: u32, height: u32) -> Self {}
     pub fn new(width: u32, height: u32) -> Self {
         let buffer = vec![RgbColor::default(); (width * height) as usize];
         Self {
@@ -25,32 +26,39 @@ impl Image {
             buffer,
         }
     }
+    pub fn at(&self, i: u32, j: u32) -> RgbColor {
+        let idx = (j * self.width + i) as usize;
+        self.buffer[idx]
+    }
 
-    pub fn with_gradient(width: u32, height: u32) -> Self {
-        let mut buffer: Vec<RgbColor> = Vec::with_capacity((width * height) as usize);
-        for row in 0..height {
-            for col in 0..width {
-                let r = (col as f32) / (width as f32 - 1.0);
-                let g = (row as f32) / (height as f32 - 1.0);
-                let color = RgbColor::new(r, g, 0.25);
-                buffer.push(color);
-            }
-        }
-        Self {
-            width,
-            height,
-            buffer,
-        }
+    pub fn set_at(&mut self, i: u32, j: u32, color: RgbColor) {
+        let idx = (j * self.width + i) as usize;
+        self.buffer[idx] = color;
+    }
+
+    pub fn pixel_to_uv(&self, i: u32, j: u32) -> (f32, f32) {
+        let u = i as f32 / (self.width - 1) as f32;
+        let v = j as f32 / (self.height - 1) as f32;
+        (u, v)
+    }
+
+    pub fn pixel_to_uv_noisy(&self, i: u32, j: u32) -> (f32, f32) {
+        let mut rng = rand::thread_rng();
+        let u = (i as f32 + rng.gen_range(0.0..1.0)) / (self.width - 1) as f32;
+        let v = (j as f32 + rng.gen_range(0.0..1.0)) / (self.height - 1) as f32;
+        (u, v)
     }
 }
 
-pub fn print_ppm(image: Image) {
+pub fn print_ppm(image: &Image) {
     let bar = ProgressBar::new((image.height).into());
+    // print header
     println!("P3\n{} {}\n255", image.width, image.height);
-    for row in 0..image.height {
-        for col in 0..image.width {
-            let idx = (row * image.width + col) as usize;
-            print!("{}", to_string(&image.buffer[idx]));
+
+    // print row by row
+    for j in (0..image.height).rev() {
+        for i in 0..image.width {
+            print!("{}", to_string(&image.at(i, j)));
         }
         println!();
         bar.inc(1);
@@ -58,19 +66,8 @@ pub fn print_ppm(image: Image) {
     bar.finish();
 }
 
-pub fn ray_color_blue_grad(ray: &Ray) -> Vector3D {
-    let t = 0.5 * (ray.direction.y + 1.0);
-    Vector3D::new(1.0, 1.0, 1.0) * (1.0 - t) + Vector3D::new(0.5, 0.7, 1.0) * t
-}
-
-pub fn ray_color_3d_grad(ray: &Ray) -> Vector3D {
-    let tx = ray.direction.x;
-    let ty = ray.direction.y;
-    Vector3D::new(tx, ty, 0.25).unit()
-}
-
-pub fn ray_color_with_sphere<T: Hittable>(ray: &Ray, body: &T) -> RgbColor {
-    if let Some(hitdata) = body.hit(ray, 0.0, f32::MAX) {
+pub fn collect_color<T: Hittable + 'static>(ray: &Ray, world: &T) -> RgbColor {
+    if let Some(hitdata) = world.hit(ray, 0.0, f32::MAX) {
         (hitdata.normal + Vector3D::new(1.0, 1.0, 1.0)) * 0.5
     } else {
         let k = 0.5 * (ray.direction.y + 1.0);
@@ -78,29 +75,44 @@ pub fn ray_color_with_sphere<T: Hittable>(ray: &Ray, body: &T) -> RgbColor {
     }
 }
 
-pub fn color_from_world<T: Hittable>(ray: &Ray, world: &[T]) -> RgbColor {
-    if let Some(hitdata) = hit_all(world, ray, 0.0, f32::MAX) {
-        (hitdata.normal + Vector3D::new(1.0, 1.0, 1.0)) * 0.5
-    } else {
-        let k = 0.5 * (ray.direction.y + 1.0);
-        RgbColor::new(1.0, 1.0, 1.0) * (1.0 - k) + RgbColor::new(0.5, 0.7, 1.0) * k
-    }
-}
-
-pub fn print_ppm_ray<T: Hittable>(image: Image, camera: Camera, world: &[T]) {
-    // header
-    println!("P3\n{} {}\n255", image.width, image.height);
-
-    // scanlines
-    for row in (0..image.height).rev() {
-        for col in 0..image.width {
-            let u = col as f32 / (image.width - 1) as f32;
-            let v = row as f32 / (image.height - 1) as f32;
+pub fn color_image<T: Hittable + 'static>(image: &mut Image, camera: Camera, world: &T) {
+    for j in (0..image.height).rev() {
+        for i in 0..image.width {
+            // find normalzed coordsinates and ray through them
+            let (u, v) = image.pixel_to_uv(i, j);
             let ray = camera.ray_from_uv(u, v);
-            let col = color_from_world(&ray, world);
-            print!("{}", to_string(&col));
+
+            // decide on color depending on the world properties
+            let color = collect_color(&ray, world);
+            image.set_at(i, j, color);
         }
-        println!();
+    }
+}
+
+pub fn color_image_noisy<T: Hittable + 'static>(image: &mut Image, camera: Camera, world: &T) {
+    for j in (0..image.height).rev() {
+        for i in 0..image.width {
+            let mut color = RgbColor::default();
+            for _ in 0..100 {
+                // find normalzed coordsinates + random deviation and ray through them
+                let (u, v) = image.pixel_to_uv_noisy(i, j);
+                let ray = camera.ray_from_uv(u, v);
+
+                // decide on color depending on the world properties
+                color += collect_color(&ray, world);
+            }
+            color = clamp_color(color, 100);
+            image.set_at(i, j, color);
+        }
+    }
+}
+
+fn clamp_color(color: RgbColor, samples_per_px: u32) -> RgbColor {
+    let scale = 1.0 / samples_per_px as f32;
+    RgbColor {
+        x: (scale * color.x).clamp(0.0, 0.999),
+        y: (scale * color.y).clamp(0.0, 0.999),
+        z: (scale * color.z).clamp(0.0, 0.999),
     }
 }
 
@@ -120,28 +132,47 @@ pub struct Camera {
     pub origin: Vector3D,
     pub viewport: Viewport,
     pub focal_length: f32,
+    lower_left: Vector3D,
 }
 
 impl Camera {
-    pub fn new(viewport: Viewport, focal_length: f32) -> Self {
-        let origin = Vector3D::default();
+    pub fn new(viewport: Viewport, focal_length: f32, origin: Vector3D) -> Self {
+        let lower_left =
+            origin - Vector3D::new(viewport.width / 2.0, viewport.height / 2.0, focal_length);
         Self {
             origin,
             viewport,
             focal_length,
+            lower_left,
         }
     }
 
     pub fn ray_from_uv(&self, u: f32, v: f32) -> Ray {
-        let lower_left = self.origin
-            - Vector3D::new(
-                self.viewport.width / 2.0,
-                self.viewport.height / 2.0,
-                self.focal_length,
-            );
-        let dir = lower_left
+        let dir = self.lower_left
             + Vector3D::new(u * self.viewport.width, v * self.viewport.height, 0.0)
             - self.origin;
         Ray::new(self.origin, dir)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::image::*;
+    use float_cmp::approx_eq;
+
+    #[test]
+    fn test_pixel_to_uv() {
+        let img = Image::new(800, 600);
+        let (u, v) = img.pixel_to_uv(0, 0);
+        assert!(approx_eq!(f32, u, 0.0, epsilon = 10e-6));
+        assert!(approx_eq!(f32, v, 0.0, epsilon = 10e-6));
+
+        let (u, v) = img.pixel_to_uv(799, 0);
+        assert!(approx_eq!(f32, u, 1.0, epsilon = 10e-6));
+        assert!(approx_eq!(f32, v, 0.0, epsilon = 10e-6));
+
+        let (u, v) = img.pixel_to_uv(799, 599);
+        assert!(approx_eq!(f32, u, 1.0, epsilon = 10e-6));
+        assert!(approx_eq!(f32, v, 1.0, epsilon = 10e-6));
     }
 }

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use std::rc::Rc;
 
 pub struct Sphere {
     pub center: Vector3D,
@@ -24,26 +25,94 @@ impl Hittable for Sphere {
         }
 
         // closest intersection
-        let t = (-half_b - discriminant.sqrt()) / a;
-        if (t < t_min) & (t > t_max) {
-            return None;
+        let mut t = (-half_b - discriminant.sqrt()) / a;
+        if (t < t_min) | (t > t_max) {
+            t = (-half_b + discriminant.sqrt()) / a;
+            if (t < t_min) | (t > t_max) {
+                return None;
+            }
         }
         let point = ray.at(t);
         let normal = (point - self.center).unit();
         let mut record = HitRecord::new(point, t, normal);
-        record.set_ray_facing_normal(&ray);
-        return Some(record);
+        record.set_ray_facing_normal(ray);
+        Some(record)
     }
 }
 
-pub fn hit_all<T: Hittable>(bodies: &[T], ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
-    let mut record = None;
-    let mut t_closest = t_max;
-    for b in bodies {
-        if let Some(temp_record) = b.hit(ray, t_min, t_closest) {
-            t_closest = temp_record.t;
-            record = Some(temp_record);
-        }
+pub struct HittableScene {
+    bodies: Vec<Rc<dyn Hittable + 'static>>,
+}
+
+impl HittableScene {
+    pub fn new() -> Self {
+        Self { bodies: Vec::new() }
     }
-    record
+
+    pub fn add<T: Hittable + 'static>(&mut self, object: Rc<T>) {
+        self.bodies.push(object);
+    }
+}
+
+impl Hittable for HittableScene {
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
+        let mut record = None;
+        let mut t_closest = t_max;
+        for body in self.bodies.iter() {
+            if let Some(temp_record) = body.hit(ray, t_min, t_closest) {
+                t_closest = temp_record.t;
+                record = Some(temp_record);
+            }
+        }
+        record
+    }
+}
+#[cfg(test)]
+mod tests {
+    const MAX_TOL_F32: f32 = 1e-6;
+    use super::*;
+    use crate::{prelude::Vector3D, ray::*};
+    use float_cmp::approx_eq;
+
+    #[test]
+    fn test_hit_sphere_miss() {
+        let s = Sphere::new(Vector3D::new(0.0, 0.0, -5.0), 1.0);
+        let ray = Ray::new(Vector3D::new(1.0, 1.0, 0.0), Vector3D::new(0.0, 0.0, -1.0));
+        let result = s.hit(&ray, 0.0, 1000.0);
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn test_hit_sphere_from_outside() {
+        let s = Sphere::new(Vector3D::new(0.0, 0.0, -5.0), 1.0);
+        let ray = Ray::new(Vector3D::new(0.0, 0.0, 0.0), Vector3D::new(0.0, 0.0, -1.0));
+        let result = s.hit(&ray, 0.0, 1000.0).unwrap();
+        assert!(approx_eq!(f32, result.t, 4.0, epsilon = MAX_TOL_F32));
+        assert!(result.is_front_face);
+
+        assert!(approx_eq!(f32, result.point.x, 0.0, epsilon = MAX_TOL_F32));
+        assert!(approx_eq!(f32, result.point.y, 0.0, epsilon = MAX_TOL_F32));
+        assert!(approx_eq!(f32, result.point.z, -4.0, epsilon = MAX_TOL_F32));
+
+        assert!(approx_eq!(f32, result.normal.x, 0.0, epsilon = MAX_TOL_F32));
+        assert!(approx_eq!(f32, result.normal.y, 0.0, epsilon = MAX_TOL_F32));
+        assert!(approx_eq!(f32, result.normal.z, 1.0, epsilon = MAX_TOL_F32));
+    }
+
+    #[test]
+    fn test_hit_sphere_from_inside() {
+        let s = Sphere::new(Vector3D::new(0.0, 0.0, -5.0), 0.5);
+        let ray = Ray::new(Vector3D::new(0.0, 0.0, -5.0), Vector3D::new(0.0, 0.0, -1.0));
+        let result = s.hit(&ray, 0.0, 1000.0).unwrap();
+        assert!(approx_eq!(f32, result.t, 0.5, epsilon = MAX_TOL_F32));
+        assert!(!result.is_front_face);
+
+        assert!(approx_eq!(f32, result.point.x, 0.0, epsilon = MAX_TOL_F32));
+        assert!(approx_eq!(f32, result.point.y, 0.0, epsilon = MAX_TOL_F32));
+        assert!(approx_eq!(f32, result.point.z, -5.5, epsilon = MAX_TOL_F32));
+
+        assert!(approx_eq!(f32, result.normal.x, 0.0, epsilon = MAX_TOL_F32));
+        assert!(approx_eq!(f32, result.normal.y, 0.0, epsilon = MAX_TOL_F32));
+        assert!(approx_eq!(f32, result.normal.z, 1.0, epsilon = MAX_TOL_F32));
+    }
 }

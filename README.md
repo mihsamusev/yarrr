@@ -17,12 +17,11 @@ Progress:
 - [x] Basic PPM image format writer
 - [ ] Rays
   - [x] intersection with sphere
+  - [x] antialiasing
   - [ ] bounce
 - [x] Camera & Scene
 - [x] Adding sphere objects
-
-Milestone 1: 1 sphere with simple normal based lighting
-![](/doc/level1.ppm)
+- [ ] Scene and config from json or yaml with `serde`
 
 Todos:
 

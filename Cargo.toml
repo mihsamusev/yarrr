@@ -8,3 +8,7 @@ edition = "2021"
 [dependencies]
 derive_more = "0.99.17"
 indicatif = "*"
+rand = "0.8.4"
+
+[dev-dependencies]
+float-cmp = "0.9"

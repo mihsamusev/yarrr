@@ -18,12 +18,14 @@ Progress:
 - [ ] Rays
   - [x] intersection with sphere
   - [x] antialiasing
-  - [ ] bounce
+  - [x] bounce
 - [x] Camera & Scene
 - [x] Adding sphere objects
+- [ ] Materials
 - [ ] Scene and config from json or yaml with `serde`
 
 Todos:
 
+- refactor unit tests
 - how to avoid mistakes where Vector3D / Point3D / Ray can be any float but color either 0.0-1.0 or 0-255 without rewritting too much code, reusing Vector3D
 - how to make sure if `vec_a` _ b is implemented we get b _ `vec_a` automatically?

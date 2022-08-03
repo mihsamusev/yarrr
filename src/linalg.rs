@@ -1,4 +1,5 @@
 use derive_more::{Add, AddAssign, Div, Neg, Sub, SubAssign};
+use rand::Rng;
 use std::ops;
 
 #[derive(
@@ -49,6 +50,25 @@ impl Vector3D {
         Self { x, y, z }
     }
 
+    // random vector in a unit cube between
+    // min and max coordinates for each axis
+    pub fn random(min: f32, max: f32) -> Self {
+        let mut rng = rand::thread_rng();
+        Self {
+            x: rng.gen_range(min..max),
+            y: rng.gen_range(min..max),
+            z: rng.gen_range(min..max),
+        }
+    }
+
+    pub fn unit_sphere_sample() -> Self {
+        loop {
+            let v = Vector3D::random(-1.0, 1.0);
+            if v.norm_squared() < 1.0 {
+                return v;
+            }
+        }
+    }
     #[inline]
     pub fn norm(&self) -> f32 {
         self.norm_squared().sqrt()

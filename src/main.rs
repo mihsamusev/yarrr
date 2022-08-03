@@ -3,8 +3,10 @@ use yarrr::prelude::*;
 
 fn main() -> Result<(), Error> {
     let aspect_ratio = 16.0 / 9.0;
-    let height = 400;
-    let width = ((height as f32) * aspect_ratio) as u32;
+    //let height = 400;
+    //let width = ((height as f32) * aspect_ratio) as u32;
+    let width = 800;
+    let height = (width as f32 / aspect_ratio) as u32;
     let mut im = Image::new(width, height);
 
     let vp = Viewport::new(2.0, aspect_ratio);

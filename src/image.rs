@@ -66,9 +66,32 @@ pub fn print_ppm(image: &Image) {
     bar.finish();
 }
 
-pub fn collect_color<T: Hittable + 'static>(ray: &Ray, world: &T) -> RgbColor {
-    if let Some(hitdata) = world.hit(ray, 0.0, f32::MAX) {
+pub fn collect_color<T>(ray: &Ray, world: &T) -> RgbColor
+where
+    T: Hittable + 'static,
+{
+    if let Some(hitdata) = world.hit(ray, 0.0001, f32::MAX) {
         (hitdata.normal + Vector3D::new(1.0, 1.0, 1.0)) * 0.5
+    } else {
+        let k = 0.5 * (ray.direction.y + 1.0);
+        RgbColor::new(1.0, 1.0, 1.0) * (1.0 - k) + RgbColor::new(0.5, 0.7, 1.0) * k
+    }
+}
+
+pub fn collect_color_difuse<T>(ray: &Ray, world: &T, depth: u32) -> RgbColor
+where
+    T: Hittable + 'static,
+{
+    if depth == 0 {
+        return RgbColor::new(0.0, 0.0, 0.0);
+    }
+
+    if let Some(hitdata) = world.hit(ray, 0.0001, f32::INFINITY) {
+        let diffuse_direction = hitdata.normal + Vector3D::random(-1.0, 1.0).unit(); // Lambertan with cos(f)
+                                                                                     // let diffuse_direction = hitdata.normal + Vector3D::unit_sphere_sample(); hacky defuse material from sphere sample cos3(f)
+        let bounced_ray_end = hitdata.point + diffuse_direction;
+        let bounced_ray = Ray::new(hitdata.point, bounced_ray_end - hitdata.point);
+        collect_color_difuse(&bounced_ray, world, depth - 1) * 0.5
     } else {
         let k = 0.5 * (ray.direction.y + 1.0);
         RgbColor::new(1.0, 1.0, 1.0) * (1.0 - k) + RgbColor::new(0.5, 0.7, 1.0) * k
@@ -90,18 +113,19 @@ pub fn color_image<T: Hittable + 'static>(image: &mut Image, camera: Camera, wor
 }
 
 pub fn color_image_noisy<T: Hittable + 'static>(image: &mut Image, camera: Camera, world: &T) {
+    let samples_per_px = 50;
     for j in (0..image.height).rev() {
         for i in 0..image.width {
             let mut color = RgbColor::default();
-            for _ in 0..100 {
+            for _ in 0..samples_per_px {
                 // find normalzed coordsinates + random deviation and ray through them
                 let (u, v) = image.pixel_to_uv_noisy(i, j);
                 let ray = camera.ray_from_uv(u, v);
 
                 // decide on color depending on the world properties
-                color += collect_color(&ray, world);
+                color += collect_color_difuse(&ray, world, 5);
             }
-            color = clamp_color(color, 100);
+            color = clamp_color(color, samples_per_px);
             image.set_at(i, j, color);
         }
     }
@@ -110,9 +134,9 @@ pub fn color_image_noisy<T: Hittable + 'static>(image: &mut Image, camera: Camer
 fn clamp_color(color: RgbColor, samples_per_px: u32) -> RgbColor {
     let scale = 1.0 / samples_per_px as f32;
     RgbColor {
-        x: (scale * color.x).clamp(0.0, 0.999),
-        y: (scale * color.y).clamp(0.0, 0.999),
-        z: (scale * color.z).clamp(0.0, 0.999),
+        x: (scale * color.x).sqrt().clamp(0.0, 0.999),
+        y: (scale * color.y).sqrt().clamp(0.0, 0.999),
+        z: (scale * color.z).sqrt().clamp(0.0, 0.999),
     }
 }
 

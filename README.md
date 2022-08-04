@@ -19,9 +19,10 @@ Progress:
   - [x] intersection with sphere
   - [x] antialiasing
   - [x] bounce
-- [x] Camera & Scene
+- [x] Scene with spheres
 - [x] Adding sphere objects
-- [ ] Materials
+- [x] Materials
+- [ ] Camera
 - [ ] Scene and config from json or yaml with `serde`
 
 Todos:

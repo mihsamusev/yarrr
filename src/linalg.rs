@@ -36,6 +36,25 @@ impl ops::Mul<f32> for Vector3D {
     }
 }
 
+impl ops::Mul<Vector3D> for f32 {
+    type Output = Vector3D;
+    #[inline]
+    fn mul(self, rhs: Vector3D) -> Self::Output {
+        rhs * self
+    }
+}
+impl ops::Mul<Vector3D> for Vector3D {
+    type Output = Self;
+    #[inline]
+    fn mul(self, rhs: Vector3D) -> Self::Output {
+        Self {
+            x: self.x * rhs.x,
+            y: self.y * rhs.y,
+            z: self.z * rhs.z,
+        }
+    }
+}
+
 impl ops::MulAssign<f32> for Vector3D {
     #[inline]
     fn mul_assign(&mut self, rhs: f32) {
@@ -79,6 +98,10 @@ impl Vector3D {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
 
+    pub fn is_near_zero(&self) -> bool {
+        self.norm() < 10e-8
+    }
+
     #[inline]
     pub fn unit(self) -> Self {
         let scale = 1.0 / self.norm();
@@ -91,7 +114,7 @@ impl Vector3D {
     }
 
     #[inline]
-    pub fn cross(&self, &other: &Self) -> Self {
+    pub fn cross(&self, other: &Self) -> Self {
         Self {
             x: self.y * other.z - self.z * other.y,
             y: self.z * other.x - self.x * other.z,

@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use std::rc::Rc;
 
 #[derive(Debug)]
 pub struct Ray {
@@ -25,14 +26,16 @@ pub struct HitRecord {
     pub t: f32,
     pub normal: Vector3D,
     pub is_front_face: bool,
+    pub material: Rc<Material>,
 }
 
 impl HitRecord {
-    pub fn new(point: Vector3D, t: f32, normal: Vector3D) -> Self {
+    pub fn new(point: Vector3D, t: f32, normal: Vector3D, material: Rc<Material>) -> Self {
         Self {
             point,
             t,
             normal,
+            material,
             is_front_face: true,
         }
     }

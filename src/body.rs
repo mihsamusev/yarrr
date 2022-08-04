@@ -4,11 +4,16 @@ use std::rc::Rc;
 pub struct Sphere {
     pub center: Vector3D,
     pub radius: f32,
+    pub material: Rc<Material>,
 }
 
 impl Sphere {
-    pub fn new(center: Vector3D, radius: f32) -> Self {
-        Self { center, radius }
+    pub fn new(center: Vector3D, radius: f32, material: Rc<Material>) -> Self {
+        Self {
+            center,
+            radius,
+            material,
+        }
     }
 }
 
@@ -34,7 +39,7 @@ impl Hittable for Sphere {
         }
         let point = ray.at(t);
         let normal = (point - self.center).unit();
-        let mut record = HitRecord::new(point, t, normal);
+        let mut record = HitRecord::new(point, t, normal, self.material.clone());
         record.set_ray_facing_normal(ray);
         Some(record)
     }
@@ -76,7 +81,7 @@ mod tests {
 
     #[test]
     fn test_hit_sphere_miss() {
-        let s = Sphere::new(Vector3D::new(0.0, 0.0, -5.0), 1.0);
+        let s = Sphere::new(Vector3D::new(0.0, 0.0, -5.0), 1.0, Rc::new(Material::None));
         let ray = Ray::new(Vector3D::new(1.0, 1.0, 0.0), Vector3D::new(0.0, 0.0, -1.0));
         let result = s.hit(&ray, 0.0, 1000.0);
         assert!(result.is_none());
@@ -84,7 +89,7 @@ mod tests {
 
     #[test]
     fn test_hit_sphere_from_outside() {
-        let s = Sphere::new(Vector3D::new(0.0, 0.0, -5.0), 1.0);
+        let s = Sphere::new(Vector3D::new(0.0, 0.0, -5.0), 1.0, Rc::new(Material::None));
         let ray = Ray::new(Vector3D::new(0.0, 0.0, 0.0), Vector3D::new(0.0, 0.0, -1.0));
         let result = s.hit(&ray, 0.0, 1000.0).unwrap();
         assert!(approx_eq!(f32, result.t, 4.0, epsilon = MAX_TOL_F32));
@@ -101,7 +106,7 @@ mod tests {
 
     #[test]
     fn test_hit_sphere_from_inside() {
-        let s = Sphere::new(Vector3D::new(0.0, 0.0, -5.0), 0.5);
+        let s = Sphere::new(Vector3D::new(0.0, 0.0, -5.0), 0.5, Rc::new(Material::None));
         let ray = Ray::new(Vector3D::new(0.0, 0.0, -5.0), Vector3D::new(0.0, 0.0, -1.0));
         let result = s.hit(&ray, 0.0, 1000.0).unwrap();
         assert!(approx_eq!(f32, result.t, 0.5, epsilon = MAX_TOL_F32));

@@ -2,9 +2,9 @@ use crate::prelude::*;
 use indicatif::ProgressBar;
 use rand::Rng;
 
-type RgbColor = Vector3D;
+pub type ColorRGB = Vector3D;
 
-fn to_string(vec: &RgbColor) -> String {
+fn to_string(vec: &ColorRGB) -> String {
     let r = (255.999 * vec.x) as u32;
     let g = (255.999 * vec.y) as u32;
     let b = (255.999 * vec.z) as u32;
@@ -14,24 +14,24 @@ fn to_string(vec: &RgbColor) -> String {
 pub struct Image {
     pub width: u32,
     pub height: u32,
-    buffer: Vec<RgbColor>,
+    buffer: Vec<ColorRGB>,
 }
 
 impl Image {
     pub fn new(width: u32, height: u32) -> Self {
-        let buffer = vec![RgbColor::default(); (width * height) as usize];
+        let buffer = vec![ColorRGB::default(); (width * height) as usize];
         Self {
             width,
             height,
             buffer,
         }
     }
-    pub fn at(&self, i: u32, j: u32) -> RgbColor {
+    pub fn at(&self, i: u32, j: u32) -> ColorRGB {
         let idx = (j * self.width + i) as usize;
         self.buffer[idx]
     }
 
-    pub fn set_at(&mut self, i: u32, j: u32, color: RgbColor) {
+    pub fn set_at(&mut self, i: u32, j: u32, color: ColorRGB) {
         let idx = (j * self.width + i) as usize;
         self.buffer[idx] = color;
     }
@@ -66,64 +66,46 @@ pub fn print_ppm(image: &Image) {
     bar.finish();
 }
 
-pub fn collect_color<T>(ray: &Ray, world: &T) -> RgbColor
-where
-    T: Hittable + 'static,
-{
-    if let Some(hitdata) = world.hit(ray, 0.0001, f32::MAX) {
-        (hitdata.normal + Vector3D::new(1.0, 1.0, 1.0)) * 0.5
-    } else {
-        let k = 0.5 * (ray.direction.y + 1.0);
-        RgbColor::new(1.0, 1.0, 1.0) * (1.0 - k) + RgbColor::new(0.5, 0.7, 1.0) * k
-    }
-}
-
-pub fn collect_color_difuse<T>(ray: &Ray, world: &T, depth: u32) -> RgbColor
+pub fn collect_color<T>(ray: &Ray, world: &T, depth: u32) -> ColorRGB
 where
     T: Hittable + 'static,
 {
     if depth == 0 {
-        return RgbColor::new(0.0, 0.0, 0.0);
+        return ColorRGB::new(0.0, 0.0, 0.0);
     }
 
     if let Some(hitdata) = world.hit(ray, 0.0001, f32::INFINITY) {
-        let diffuse_direction = hitdata.normal + Vector3D::random(-1.0, 1.0).unit(); // Lambertan with cos(f)
-                                                                                     // let diffuse_direction = hitdata.normal + Vector3D::unit_sphere_sample(); hacky defuse material from sphere sample cos3(f)
-        let bounced_ray_end = hitdata.point + diffuse_direction;
-        let bounced_ray = Ray::new(hitdata.point, bounced_ray_end - hitdata.point);
-        collect_color_difuse(&bounced_ray, world, depth - 1) * 0.5
+        //let diffuse_direction = hitdata.normal + Vector3D::random(-1.0, 1.0).unit(); // Lambertan with cos(f)
+        // let diffuse_direction = hitdata.normal + Vector3D::unit_sphere_sample(); hacky defuse material from sphere sample cos3(f)
+        //let bounced_ray_end = hitdata.point + diffuse_direction;
+        //let bounced_ray = Ray::new(hitdata.point, bounced_ray_end - hitdata.point);
+        //collect_color_difuse(&bounced_ray, world, depth - 1) * 0.5
+        if let Some(bounce) = Material::scatter(&ray, &hitdata) {
+            return bounce.attenuation * collect_color(&bounce.ray, world, depth - 1);
+        } else {
+            return ColorRGB::new(0.0, 0.0, 0.0);
+        }
     } else {
         let k = 0.5 * (ray.direction.y + 1.0);
-        RgbColor::new(1.0, 1.0, 1.0) * (1.0 - k) + RgbColor::new(0.5, 0.7, 1.0) * k
+        ColorRGB::new(1.0, 1.0, 1.0) * (1.0 - k) + ColorRGB::new(0.5, 0.7, 1.0) * k
     }
 }
 
-pub fn color_image<T: Hittable + 'static>(image: &mut Image, camera: Camera, world: &T) {
+pub fn color_image<T>(image: &mut Image, camera: Camera, world: &T)
+where
+    T: Hittable + 'static,
+{
+    let samples_per_px = 100;
     for j in (0..image.height).rev() {
         for i in 0..image.width {
-            // find normalzed coordsinates and ray through them
-            let (u, v) = image.pixel_to_uv(i, j);
-            let ray = camera.ray_from_uv(u, v);
-
-            // decide on color depending on the world properties
-            let color = collect_color(&ray, world);
-            image.set_at(i, j, color);
-        }
-    }
-}
-
-pub fn color_image_noisy<T: Hittable + 'static>(image: &mut Image, camera: Camera, world: &T) {
-    let samples_per_px = 50;
-    for j in (0..image.height).rev() {
-        for i in 0..image.width {
-            let mut color = RgbColor::default();
+            let mut color = ColorRGB::default();
             for _ in 0..samples_per_px {
                 // find normalzed coordsinates + random deviation and ray through them
                 let (u, v) = image.pixel_to_uv_noisy(i, j);
                 let ray = camera.ray_from_uv(u, v);
 
                 // decide on color depending on the world properties
-                color += collect_color_difuse(&ray, world, 5);
+                color += collect_color(&ray, world, 5);
             }
             color = clamp_color(color, samples_per_px);
             image.set_at(i, j, color);
@@ -131,9 +113,9 @@ pub fn color_image_noisy<T: Hittable + 'static>(image: &mut Image, camera: Camer
     }
 }
 
-fn clamp_color(color: RgbColor, samples_per_px: u32) -> RgbColor {
+fn clamp_color(color: ColorRGB, samples_per_px: u32) -> ColorRGB {
     let scale = 1.0 / samples_per_px as f32;
-    RgbColor {
+    ColorRGB {
         x: (scale * color.x).sqrt().clamp(0.0, 0.999),
         y: (scale * color.y).sqrt().clamp(0.0, 0.999),
         z: (scale * color.z).sqrt().clamp(0.0, 0.999),

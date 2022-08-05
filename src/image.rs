@@ -91,7 +91,7 @@ where
     }
 }
 
-pub fn color_image<T>(image: &mut Image, camera: Camera, world: &T)
+pub fn color_image<T>(image: &mut Image, camera: impl Camera, world: &T)
 where
     T: Hittable + 'static,
 {
@@ -119,45 +119,6 @@ fn clamp_color(color: ColorRGB, samples_per_px: u32) -> ColorRGB {
         x: (scale * color.x).sqrt().clamp(0.0, 0.999),
         y: (scale * color.y).sqrt().clamp(0.0, 0.999),
         z: (scale * color.z).sqrt().clamp(0.0, 0.999),
-    }
-}
-
-pub struct Viewport {
-    pub width: f32,
-    pub height: f32,
-}
-
-impl Viewport {
-    pub fn new(height: f32, aspect_ratio: f32) -> Self {
-        let width = aspect_ratio * height;
-        Self { width, height }
-    }
-}
-
-pub struct Camera {
-    pub origin: Vector3D,
-    pub viewport: Viewport,
-    pub focal_length: f32,
-    lower_left: Vector3D,
-}
-
-impl Camera {
-    pub fn new(viewport: Viewport, focal_length: f32, origin: Vector3D) -> Self {
-        let lower_left =
-            origin - Vector3D::new(viewport.width / 2.0, viewport.height / 2.0, focal_length);
-        Self {
-            origin,
-            viewport,
-            focal_length,
-            lower_left,
-        }
-    }
-
-    pub fn ray_from_uv(&self, u: f32, v: f32) -> Ray {
-        let dir = self.lower_left
-            + Vector3D::new(u * self.viewport.width, v * self.viewport.height, 0.0)
-            - self.origin;
-        Ray::new(self.origin, dir)
     }
 }
 

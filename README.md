@@ -15,18 +15,15 @@ Progress:
 
 - [x] Vector math in 3D
 - [x] Basic PPM image format writer
-- [ ] Rays
+- [x] Rays
   - [x] intersection with sphere
   - [x] antialiasing
-  - [x] bounce
+  - [x] multiple bounce
+  - [x] diffuse scattering
+  - [x] reflection
+  - [x] refraction
 - [x] Scene with spheres
 - [x] Adding sphere objects
 - [x] Materials
-- [ ] Camera
-- [ ] Scene and config from json or yaml with `serde`
-
-Todos:
-
-- refactor unit tests
-- how to avoid mistakes where Vector3D / Point3D / Ray can be any float but color either 0.0-1.0 or 0-255 without rewritting too much code, reusing Vector3D
-- how to make sure if `vec_a` _ b is implemented we get b _ `vec_a` automatically?
+- [x] Camera with arbitrary coordinate system
+- [ ] Scene builder config from json or yaml with `serde`

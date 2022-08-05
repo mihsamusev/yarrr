@@ -121,4 +121,36 @@ impl Vector3D {
             z: self.x * other.y - self.y * other.x,
         }
     }
+
+    pub fn zero() -> Self {
+        Self {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        }
+    }
+
+    pub fn unit_x() -> Self {
+        Self {
+            x: 1.0,
+            y: 0.0,
+            z: 0.0,
+        }
+    }
+
+    pub fn unit_y() -> Self {
+        Self {
+            x: 0.0,
+            y: 1.0,
+            z: 0.0,
+        }
+    }
+
+    pub fn unit_z() -> Self {
+        Self {
+            x: 0.0,
+            y: 0.0,
+            z: 1.0,
+        }
+    }
 }

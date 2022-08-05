@@ -13,6 +13,8 @@ Goals:
 
 Progress:
 
+![](/doc/final_render_1200.jpeg)
+
 - [x] Vector math in 3D
 - [x] Basic PPM image format writer
 - [x] Rays

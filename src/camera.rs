@@ -49,7 +49,6 @@ pub struct FovCamera {
     origin: Vector3D,
     pub vfow: f32,
     pub aspect_ratio: f32,
-    viewport: Viewport,
     vp_lower_left_corner: Vector3D,
     vp_horizontal_span: Vector3D,
     vp_vertical_span: Vector3D,
@@ -84,7 +83,6 @@ impl FovCamera {
             vp_vertical_span,
             vfow,
             aspect_ratio,
-            viewport,
         }
     }
 }

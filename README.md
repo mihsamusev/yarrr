@@ -29,6 +29,7 @@ Progress:
 - [x] Materials
 - [x] Camera with arbitrary coordinate system
 - [ ] Scene builder config from json or yaml with `serde`
+  - [ ] example to generate scene `yaml` file
 - [ ] refactor unit tests from `tests` to coresponding modules
 - [ ] performance optimization
   - [ ] benches for hot paths

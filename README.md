@@ -29,3 +29,8 @@ Progress:
 - [x] Materials
 - [x] Camera with arbitrary coordinate system
 - [ ] Scene builder config from json or yaml with `serde`
+- [ ] refactor unit tests from `tests` to coresponding modules
+- [ ] performance optimization
+  - [ ] benches for hot paths
+  - [ ] profiling with perf and flamegraph
+  - [ ] figure out the artifact

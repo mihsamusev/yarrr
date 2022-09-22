@@ -2,36 +2,50 @@
 
 [![](https://github.com/mihsamusev/yarrr/actions/workflows/build.yml/badge.svg)](https://github.com/mihsamusev/yarrr/actions/workflows/build.yml)
 
-Study exercise in rewriting the famous [Ray Tracing in One Weekend by Peter Shirley](https://raytracing.github.io/books/RayTracingInOneWeekend.html#thevec3class/vec3utilityfunctions) from C++ to Rust to practice the language.
+Study exercise in rewriting the famous [Ray Tracing in One Weekend by Peter Shirley](https://raytracing.github.io/books/RayTracingInOneWeekend.html#thevec3class/vec3utilityfunctions) from C++ to Rust to practice the language. This is also my final project submission of the course [OTUS Rust Developer](https://otus.ru/lessons/rust-developer/).
 
-Goals:
+## Goals
 
 - not looking at other numerous Rust implementations until im done with first complete implementaton
 - not using 3rd party linear algebra libraries until im done with first complete implementaton
 - practice writting organizing rust modules, writing tests and using CI like it was a production ready tool
 - have fun and show it to my mum when im done
 
-Progress:
+## Getting started
+
+```sh
+cargo run --release --example final_render > render.ppm
+```
+
+## Progress
 
 ![](/doc/final_render_1200.jpeg)
 
-- [x] Vector math in 3D
-- [x] Basic PPM image format writer
-- [x] Rays
+- [x] vector math in 3D
+- [x] basic PPM image format writer
+  - [ ] loading bar
+- [x] rays
   - [x] intersection with sphere
   - [x] antialiasing
   - [x] multiple bounce
   - [x] diffuse scattering
   - [x] reflection
   - [x] refraction
-- [x] Scene with spheres
-- [x] Adding sphere objects
-- [x] Materials
-- [x] Camera with arbitrary coordinate system
-- [ ] Scene builder config from json or yaml with `serde`
+- [x] scene with spheres
+- [x] adding sphere objects
+- [x] materials
+- [x] camera with arbitrary coordinate system
+- [ ] simle CLI to control output image parameters
+- [ ] scene builder config from json or yaml with `serde`
   - [ ] example to generate scene `yaml` file
 - [ ] refactor unit tests from `tests` to coresponding modules
 - [ ] performance optimization
   - [ ] benches for hot paths
   - [ ] profiling with perf and flamegraph
   - [ ] figure out the artifact
+
+## Benchmarks
+
+AMD Ryzen 5 5600H, 3.2GHz
+400 -> 00:03:13
+800 -> 00:09:04

@@ -71,24 +71,3 @@ impl Scatter for Material {
         }
     }
 }
-
-// normal vec is unit
-pub fn reflect(vec: &Vector3D, normal: &Vector3D) -> Vector3D {
-    vec.clone() - normal.clone() * vec.dot(normal) * 2.0
-}
-
-pub fn refract(vec: &Vector3D, normal: &Vector3D, refraction_index: f32) -> Vector3D {
-    let vec = vec.clone();
-    let normal = normal.clone();
-    let cos_theta_incoming = (-vec).dot(&normal).min(1.0);
-
-    let r_out_perp = refraction_index * (vec + cos_theta_incoming * normal);
-    let r_out_para = -(1.0 - r_out_perp.norm_squared()).abs().sqrt() * normal;
-    r_out_perp + r_out_para
-}
-
-#[inline]
-pub fn shlick_reflectance(cos_theta: f32, refraction_index: f32) -> f32 {
-    let r0 = (1.0 - refraction_index) / (1.0 + refraction_index);
-    r0 * r0 + (1.0 - r0 * r0) * (1.0 - cos_theta).powi(5)
-}

@@ -12,3 +12,8 @@ rand = "0.8.4"
 
 [dev-dependencies]
 float-cmp = "0.9"
+criterion = "0.3"
+
+[[bench]]
+name = "vector_benchmark"
+harness = false

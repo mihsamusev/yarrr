@@ -15,5 +15,5 @@ float-cmp = "0.9"
 criterion = "0.3"
 
 [[bench]]
-name = "vector_benchmark"
+name = "single_thread_benchmarks"
 harness = false

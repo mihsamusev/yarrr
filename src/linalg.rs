@@ -1,5 +1,5 @@
 use derive_more::{Add, AddAssign, Div, Neg, Sub, SubAssign};
-use rand::Rng;
+use rand::{distributions::Uniform, prelude::Distribution, Rng};
 use std::ops;
 
 #[derive(
@@ -73,11 +73,17 @@ impl Vector3D {
     // min and max coordinates for each axis
     pub fn random(min: f32, max: f32) -> Self {
         let mut rng = rand::thread_rng();
+        let range = Uniform::from(min..max);
         Self {
-            x: rng.gen_range(min..max),
-            y: rng.gen_range(min..max),
-            z: rng.gen_range(min..max),
+            x: range.sample(&mut rng),
+            y: range.sample(&mut rng),
+            z: range.sample(&mut rng),
         }
+        // Self {
+        //     x: rng.gen_range(min..max),
+        //     y: rng.gen_range(min..max),
+        //     z: rng.gen_range(min..max),
+        // }
     }
 
     pub fn unit_sphere_sample() -> Self {
@@ -88,6 +94,23 @@ impl Vector3D {
             }
         }
     }
+
+    pub fn unit_sphere_sample_2() -> Self {
+        // based on https://stats.stackexchange.com/a/7988
+        let mut rng = rand::thread_rng();
+        let range = Uniform::from(0.0..1.0);
+        loop {
+            let z = 2.0 * range.sample(&mut rng) - 1.0;
+            let theta = 2.0 * range.sample(&mut rng) * std::f32::consts::PI - std::f32::consts::PI;
+            let x = (1.0 - z * z).sqrt() * theta.sin();
+            let y = (1.0 - z * z).sqrt() * theta.cos();
+            let v = Vector3D::new(x, y, z);
+            if v.norm_squared() < 1.0 {
+                return v;
+            }
+        }
+    }
+
     #[inline]
     pub fn norm(&self) -> f32 {
         self.norm_squared().sqrt()

@@ -11,6 +11,10 @@ fn make_random_vector() -> Vector3D {
     Vector3D::random(0.0, 1.0)
 }
 
+fn unit_sphere_sample() -> Vector3D {
+    Vector3D::unit_sphere_sample()
+}
+
 fn hit_one_sphere() -> Option<HitRecord> {
     let sphere = Sphere::new(Vector3D::new(2.0, 0.0, 0.0), 0.5, Rc::new(Material::None));
     let ray = Ray::new(Vector3D::zero(), Vector3D::unit_x());
@@ -58,6 +62,7 @@ fn no_material_scatter() -> Option<HitBounce> {
 
 fn criterion_benchmark(c: &mut Criterion) {
     c.bench_function("random vector", |b| b.iter(|| make_random_vector()));
+    c.bench_function("unit sphere sample", |b| b.iter(|| unit_sphere_sample()));
     c.bench_function("hit 1 sphere", |b| b.iter(|| hit_one_sphere()));
     c.bench_function("hit n spheres", |b| b.iter(|| hit_n_spheres(black_box(5))));
     c.bench_function("lambertan scatter", |b| {

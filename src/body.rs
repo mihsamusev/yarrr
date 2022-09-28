@@ -59,6 +59,12 @@ impl HittableScene {
     }
 }
 
+impl Default for HittableScene {
+    fn default() -> Self {
+        HittableScene::new()
+    }
+}
+
 impl Hittable for HittableScene {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         let mut record = None;

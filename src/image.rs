@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use indicatif::ProgressBar;
+use indicatif::{ProgressBar, ProgressStyle};
 use rand::Rng;
 
 pub type ColorRGB = Vector3D;
@@ -26,6 +26,7 @@ impl Image {
             buffer,
         }
     }
+
     pub fn at(&self, i: u32, j: u32) -> ColorRGB {
         let idx = (j * self.width + i) as usize;
         self.buffer[idx]
@@ -51,8 +52,6 @@ impl Image {
 }
 
 pub fn print_ppm(image: &Image) {
-    let bar = ProgressBar::new((image.height).into());
-    // print header
     println!("P3\n{} {}\n255", image.width, image.height);
 
     // print row by row
@@ -61,9 +60,7 @@ pub fn print_ppm(image: &Image) {
             print!("{}", to_string(&image.at(i, j)));
         }
         println!();
-        bar.inc(1);
     }
-    bar.finish();
 }
 
 pub fn collect_color<T>(ray: &Ray, world: &T, depth: u32) -> ColorRGB
@@ -75,15 +72,10 @@ where
     }
 
     if let Some(hitdata) = world.hit(ray, 0.0001, f32::INFINITY) {
-        //let diffuse_direction = hitdata.normal + Vector3D::random(-1.0, 1.0).unit(); // Lambertan with cos(f)
-        // let diffuse_direction = hitdata.normal + Vector3D::unit_sphere_sample(); hacky defuse material from sphere sample cos3(f)
-        //let bounced_ray_end = hitdata.point + diffuse_direction;
-        //let bounced_ray = Ray::new(hitdata.point, bounced_ray_end - hitdata.point);
-        //collect_color_difuse(&bounced_ray, world, depth - 1) * 0.5
-        if let Some(bounce) = Material::scatter(&ray, &hitdata) {
-            return bounce.attenuation * collect_color(&bounce.ray, world, depth - 1);
+        if let Some(bounce) = Material::scatter(ray, &hitdata) {
+            bounce.attenuation * collect_color(&bounce.ray, world, depth - 1)
         } else {
-            return ColorRGB::new(0.0, 0.0, 0.0);
+            ColorRGB::new(0.0, 0.0, 0.0)
         }
     } else {
         let k = 0.5 * (ray.direction.y + 1.0);
@@ -96,6 +88,14 @@ where
     T: Hittable + 'static,
 {
     let samples_per_px = 100;
+
+    let bar = ProgressBar::new((image.height).into()).with_style(
+        ProgressStyle::with_template(
+            "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
+        )
+        .unwrap(),
+    );
+
     for j in (0..image.height).rev() {
         for i in 0..image.width {
             let mut color = ColorRGB::default();
@@ -110,7 +110,11 @@ where
             color = clamp_color(color, samples_per_px);
             image.set_at(i, j, color);
         }
+
+        // row finished
+        bar.inc(1);
     }
+    bar.finish();
 }
 
 fn clamp_color(color: ColorRGB, samples_per_px: u32) -> ColorRGB {

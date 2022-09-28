@@ -31,19 +31,18 @@ impl Scatter for Material {
                 }
                 Some(HitBounce {
                     ray: Ray::new(hit.point, scatter_dir),
-                    attenuation: color.clone(),
+                    attenuation: color,
                 })
             }
             Material::Metal(color, fuzz) => {
                 let reflected_dir = reflect(&ray.direction, &hit.normal);
                 let fuzzy_reflected_dir = reflected_dir + Vector3D::unit_sphere_sample() * fuzz;
-                let attenuation = color.clone();
                 if fuzzy_reflected_dir.dot(&hit.normal).abs() < 10e-8 {
                     return None;
                 }
                 Some(HitBounce {
                     ray: Ray::new(hit.point, fuzzy_reflected_dir),
-                    attenuation,
+                    attenuation: color,
                 })
             }
             Material::Dielectric(refraction_index) => {
@@ -70,25 +69,4 @@ impl Scatter for Material {
             }
         }
     }
-}
-
-// normal vec is unit
-pub fn reflect(vec: &Vector3D, normal: &Vector3D) -> Vector3D {
-    vec.clone() - normal.clone() * vec.dot(normal) * 2.0
-}
-
-pub fn refract(vec: &Vector3D, normal: &Vector3D, refraction_index: f32) -> Vector3D {
-    let vec = vec.clone();
-    let normal = normal.clone();
-    let cos_theta_incoming = (-vec).dot(&normal).min(1.0);
-
-    let r_out_perp = refraction_index * (vec + cos_theta_incoming * normal);
-    let r_out_para = -(1.0 - r_out_perp.norm_squared()).abs().sqrt() * normal;
-    r_out_perp + r_out_para
-}
-
-#[inline]
-pub fn shlick_reflectance(cos_theta: f32, refraction_index: f32) -> f32 {
-    let r0 = (1.0 - refraction_index) / (1.0 + refraction_index);
-    r0 * r0 + (1.0 - r0 * r0) * (1.0 - cos_theta).powi(5)
 }

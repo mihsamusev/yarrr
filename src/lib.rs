@@ -4,6 +4,7 @@ pub mod image;
 pub mod linalg;
 pub mod material;
 pub mod ray;
+pub mod renderer;
 
 pub mod prelude {
     pub use crate::body::*;
@@ -12,4 +13,5 @@ pub mod prelude {
     pub use crate::linalg::*;
     pub use crate::material::*;
     pub use crate::ray::*;
+    pub use crate::renderer::*;
 }

@@ -88,7 +88,11 @@ fn main() {
     let scene = create_scene();
 
     // render
-    color_image(&mut im, cam, &scene);
+    let settings = RenderSettings {
+        samples_per_px: 100,
+        bounce_depth: 5,
+    };
+    color_image(&mut im, cam, &scene, settings);
     // print_ppm(&im);
 
     image::save_buffer(

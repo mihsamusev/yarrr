@@ -12,12 +12,15 @@ Study exercise in rewriting the famous [Ray Tracing in One Weekend by Peter Shir
 - have fun and show it to my mum when im done
 
 ## Getting started
+
 Run one of the examples
+
 ```sh
 cargo run --release --example final_render > render.ppm
 ```
 
 Alternatively run a custom job
+
 ```sh
 cargo run --release --job job.yaml --output render.jpeg
 ```
@@ -38,11 +41,11 @@ cargo run --release --job job.yaml --output render.jpeg
   - [x] scene with spheres
   - [x] adding sphere objects
   - [x] materials
-  - [x] camera with arbitrary coordinate system 
+  - [x] camera with arbitrary coordinate system
 - [ ] infrastructure
   - [x] basic PPM image format writer
   - [x] loading bar
-  - [ ] custom buffer writter https://docs.rs/image/latest/image/fn.save_buffer.html
+  - [x] custom buffer writter https://docs.rs/image/latest/image/fn.save_buffer.html
   - [ ] simple CLI to control output image parameters
   - [ ] scene builder config from json or yaml with `serde`
   - [ ] example to generate scene `json` file

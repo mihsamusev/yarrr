@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use rand::Rng;
+use rand::distributions::{Distribution, Uniform};
 
 pub type ColorRGB = Vector3D;
 
@@ -37,8 +37,9 @@ impl Image {
 
     pub fn pixel_to_uv_noisy(&self, i: u32, j: u32) -> (f32, f32) {
         let mut rng = rand::thread_rng();
-        let u = (i as f32 + rng.gen_range(0.0..1.0)) / (self.width - 1) as f32;
-        let v = (j as f32 + rng.gen_range(0.0..1.0)) / (self.height - 1) as f32;
+        let range = Uniform::from(0.0..1.0);
+        let u = (i as f32 + range.sample(&mut rng)) / (self.width - 1) as f32;
+        let v = (j as f32 + range.sample(&mut rng)) / (self.height - 1) as f32;
         (u, v)
     }
 

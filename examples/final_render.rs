@@ -80,7 +80,7 @@ fn main() {
         aspect_ratio,
     );
 
-    let width = 400;
+    let width = 800;
     let height = (width as f32 / aspect_ratio) as u32;
     let mut im = Image::new(width, height);
 
@@ -96,7 +96,7 @@ fn main() {
     // print_ppm(&im);
 
     image::save_buffer(
-        "render.jpeg",
+        "doc/render.jpeg",
         &im.as_bytes(),
         im.width,
         im.height,

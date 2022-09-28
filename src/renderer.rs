@@ -33,7 +33,10 @@ where
         return ColorRGB::new(0.0, 0.0, 0.0);
     }
 
-    if let Some(hitdata) = world.hit(ray, 0.0001, f32::INFINITY) {
+    // t_min value not too small to avoid shadow-acne problem
+    // https://raytracing.github.io/books/RayTracingInOneWeekend.html#diffusematerials/fixingshadowacne
+    //
+    if let Some(hitdata) = world.hit(ray, 1E-3, f32::INFINITY) {
         if let Some(bounce) = Material::scatter(ray, &hitdata) {
             bounce.attenuation * collect_color(&bounce.ray, world, depth - 1)
         } else {
@@ -77,7 +80,42 @@ where
     bar.finish();
 }
 
+pub fn par_color_image<W, C>(image: &mut Image, camera: C, world: W, settings: RenderSettings)
+where
+    C: Camera + Send + 'static,
+    W: Hittable + Send + 'static,
+{
+    let bar = ProgressBar::new((image.height).into()).with_style(
+        ProgressStyle::with_template(
+            "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
+        )
+        .unwrap(),
+    );
+
+    for j in 0..image.height {
+        for i in 0..image.width {
+            let mut color = ColorRGB::default();
+            for _ in 0..settings.samples_per_px {
+                // find normalzed coordsinates + random deviation and ray through them
+                let (u, v) = image.pixel_to_uv_noisy(i, j);
+                let ray = camera.ray_from_uv(u, v);
+
+                // decide on color depending on the world properties
+                color += collect_color(&ray, &world, settings.bounce_depth);
+            }
+            color = clamp_color(color, settings.samples_per_px);
+            image.set_at(i, j, color);
+        }
+
+        // row finished
+        bar.inc(1);
+    }
+    bar.finish();
+}
+
 fn clamp_color(color: ColorRGB, samples_per_px: u32) -> ColorRGB {
+    // gamma=2.0 correcting + clamping
+    // https://raytracing.github.io/books/RayTracingInOneWeekend.html#diffusematerials/usinggammacorrectionforaccuratecolorintensity
     let scale = 1.0 / samples_per_px as f32;
     ColorRGB {
         x: (scale * color.x).sqrt().clamp(0.0, 0.999),

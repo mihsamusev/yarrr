@@ -1,5 +1,6 @@
 use derive_more::{Add, AddAssign, Div, Neg, Sub, SubAssign};
-use rand::Rng;
+use rand::distributions::{Distribution, Uniform};
+use std::f32::consts::PI;
 use std::ops;
 
 #[derive(
@@ -175,20 +176,36 @@ impl Vector3D {
     // min and max coordinates for each axis
     pub fn random(min: f32, max: f32) -> Self {
         let mut rng = rand::thread_rng();
+        let range = Uniform::from(min..max);
+
         Self {
-            x: rng.gen_range(min..max),
-            y: rng.gen_range(min..max),
-            z: rng.gen_range(min..max),
+            x: range.sample(&mut rng),
+            y: range.sample(&mut rng),
+            z: range.sample(&mut rng),
         }
     }
 
-    pub fn unit_sphere_sample() -> Self {
+    pub fn unit_sphere_sample_0() -> Self {
         loop {
             let v = Vector3D::random(-1.0, 1.0);
             if v.norm_squared() < 1.0 {
                 return v;
             }
         }
+    }
+
+    pub fn unit_sphere_sample() -> Self {
+        // based on https://stats.stackexchange.com/a/7988
+        let mut rng = rand::thread_rng();
+        let range = Uniform::from(0.0..1.0);
+
+        let z = 2.0 * range.sample(&mut rng) - 1.0; // sample z between -1 and 1
+        let theta = 2.0 * PI * range.sample(&mut rng) - PI; // sample uniform theta
+        let r = (1.0 - z * z).sqrt();
+        let x = r * theta.sin();
+        let y = r * theta.cos();
+
+        Vector3D { x, y, z }
     }
 
     #[inline]

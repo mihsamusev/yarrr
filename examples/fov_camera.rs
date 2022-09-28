@@ -1,24 +1,23 @@
-use std::rc::Rc;
 use yarrr::prelude::*;
 
-fn create_scene() -> HittableScene {
-    let m_left = Rc::new(Material::Lambertan(ColorRGB::new(0.0, 0.0, 1.0)));
-    let m_right = Rc::new(Material::Lambertan(ColorRGB::new(1.0, 0.0, 0.0)));
+fn create_scene() -> SphereScene {
+    let m_left = Material::Lambertan(ColorRGB::new(0.0, 0.0, 1.0));
+    let m_right = Material::Lambertan(ColorRGB::new(1.0, 0.0, 0.0));
 
-    let mut scene = HittableScene::new();
+    let mut scene = SphereScene::new();
     let radius = std::f32::consts::FRAC_PI_4.cos();
 
-    scene.add(Rc::new(Sphere::new(
+    scene.add(Sphere::new(
         Vector3D::new(-radius, 0.0, -1.0),
         radius,
         m_left,
-    )));
+    ));
 
-    scene.add(Rc::new(Sphere::new(
+    scene.add(Sphere::new(
         Vector3D::new(radius, 0.0, -1.0),
         radius,
         m_right,
-    )));
+    ));
 
     scene
 }
@@ -46,6 +45,6 @@ fn main() {
         samples_per_px: 100,
         bounce_depth: 5,
     };
-    color_image(&mut im, cam, &scene, settings);
+    color_image(&mut im, cam, scene, settings);
     print_ppm(&im);
 }

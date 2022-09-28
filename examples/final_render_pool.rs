@@ -1,45 +1,33 @@
 use rand::Rng;
-use std::rc::Rc;
 use yarrr::prelude::*;
 
-fn create_scene() -> HittableScene {
-    let mut scene = HittableScene::new();
+fn create_scene() -> SphereScene {
+    let mut scene = SphereScene::new();
 
     // ground
     let m_ground = Material::Lambertan(ColorRGB::new(0.5, 0.5, 0.5));
-    scene.add(Rc::new(Sphere::new(
+    scene.add(Sphere::new(
         Vector3D::new(0.0, -1000.0, 0.0),
         1000.0,
         m_ground,
-    )));
+    ));
 
     // 3 big beautiful spheres
     let material1 = Material::Dielectric(1.5);
-    scene.add(Rc::new(Sphere::new(
-        Vector3D::new(0.0, 1.0, 0.0),
-        1.0,
-        material1,
-    )));
+    scene.add(Sphere::new(Vector3D::new(0.0, 1.0, 0.0), 1.0, material1));
 
     let material2 = Material::Lambertan(ColorRGB::new(0.4, 0.2, 0.1));
-    scene.add(Rc::new(Sphere::new(
-        Vector3D::new(-4.0, 1.0, 0.0),
-        1.0,
-        material2,
-    )));
+    scene.add(Sphere::new(Vector3D::new(-4.0, 1.0, 0.0), 1.0, material2));
 
     let material3 = Material::Metal(ColorRGB::new(0.7, 0.6, 0.5), 0.0);
-    scene.add(Rc::new(Sphere::new(
-        Vector3D::new(4.0, 1.0, 0.0),
-        1.0,
-        material3,
-    )));
+    scene.add(Sphere::new(Vector3D::new(4.0, 1.0, 0.0), 1.0, material3));
 
     // random small spheres on a grid with random materials
     let mut rng = rand::thread_rng();
     let scene_bound = Vector3D::new(4.0, 0.2, 0.0);
-    for i in -11..=11 {
-        for j in -11..=11 {
+    let n = 11;
+    for i in -n..=n {
+        for j in -n..=n {
             let material_rand: u32 = rng.gen_range(0..100);
             let x = i as f32 + rng.gen_range(0.0..0.9);
             let y = j as f32 + rng.gen_range(0.0..0.9);
@@ -61,7 +49,7 @@ fn create_scene() -> HittableScene {
                     // glass
                     _ => Material::Dielectric(1.5),
                 };
-                scene.add(Rc::new(Sphere::new(center, 0.2, material)));
+                scene.add(Sphere::new(center, 0.2, material));
             }
         }
     }
@@ -80,7 +68,7 @@ fn main() {
         aspect_ratio,
     );
 
-    let width = 400;
+    let width = 1600;
     let height = (width as f32 / aspect_ratio) as u32;
     let mut im = Image::new(width, height);
 
@@ -96,7 +84,7 @@ fn main() {
     // print_ppm(&im);
 
     image::save_buffer(
-        "doc/render.jpeg",
+        "doc/final_render.jpeg",
         &im.as_bytes(),
         im.width,
         im.height,

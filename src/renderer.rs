@@ -48,42 +48,9 @@ where
     }
 }
 
-pub fn color_image<T>(image: &mut Image, camera: impl Camera, world: &T, settings: RenderSettings)
+pub fn color_image<T>(image: &mut Image, camera: impl Camera, world: T, settings: RenderSettings)
 where
     T: Hittable + 'static,
-{
-    let bar = ProgressBar::new((image.height).into()).with_style(
-        ProgressStyle::with_template(
-            "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
-        )
-        .unwrap(),
-    );
-
-    for j in 0..image.height {
-        for i in 0..image.width {
-            let mut color = ColorRGB::default();
-            for _ in 0..settings.samples_per_px {
-                // find normalzed coordsinates + random deviation and ray through them
-                let (u, v) = image.pixel_to_uv_noisy(i, j);
-                let ray = camera.ray_from_uv(u, v);
-
-                // decide on color depending on the world properties
-                color += collect_color(&ray, world, settings.bounce_depth);
-            }
-            color = clamp_color(color, settings.samples_per_px);
-            image.set_at(i, j, color);
-        }
-
-        // row finished
-        bar.inc(1);
-    }
-    bar.finish();
-}
-
-pub fn par_color_image<W, C>(image: &mut Image, camera: C, world: W, settings: RenderSettings)
-where
-    C: Camera + Send + 'static,
-    W: Hittable + Send + 'static,
 {
     let bar = ProgressBar::new((image.height).into()).with_style(
         ProgressStyle::with_template(

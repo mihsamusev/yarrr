@@ -19,7 +19,7 @@ pub enum Material {
 
 impl Scatter for Material {
     fn scatter(ray: &Ray, hit: &HitRecord) -> Option<HitBounce> {
-        match *hit.material {
+        match hit.material {
             Material::None => Some(HitBounce {
                 ray: Ray::new(hit.point, hit.normal),
                 attenuation: ColorRGB::new(0.5, 0.5, 0.5),
@@ -31,22 +31,22 @@ impl Scatter for Material {
                 }
                 Some(HitBounce {
                     ray: Ray::new(hit.point, scatter_dir),
-                    attenuation: color,
+                    attenuation: *color,
                 })
             }
             Material::Metal(color, fuzz) => {
                 let reflected_dir = reflect(&ray.direction, &hit.normal);
-                let fuzzy_reflected_dir = reflected_dir + Vector3D::unit_sphere_sample() * fuzz;
+                let fuzzy_reflected_dir = reflected_dir + Vector3D::unit_sphere_sample() * *fuzz;
                 if fuzzy_reflected_dir.dot(&hit.normal).abs() < 10e-8 {
                     return None;
                 }
                 Some(HitBounce {
                     ray: Ray::new(hit.point, fuzzy_reflected_dir),
-                    attenuation: color,
+                    attenuation: *color,
                 })
             }
             Material::Dielectric(refraction_index) => {
-                let mut ri = refraction_index;
+                let mut ri = *refraction_index;
                 if hit.is_front_face {
                     ri = 1.0 / ri;
                 }

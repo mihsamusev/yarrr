@@ -11,12 +11,16 @@ pub struct Image {
 
 impl Image {
     pub fn new(width: u32, height: u32) -> Self {
-        let buffer = vec![ColorRGB::default(); (width * height) as usize];
+        let data = vec![ColorRGB::default(); (width * height) as usize];
         Self {
             width,
             height,
-            buffer,
+            buffer: data,
         }
+    }
+
+    pub fn dims(&self) -> (u32, u32) {
+        (self.width, self.height)
     }
 
     pub fn at(&self, i: u32, j: u32) -> ColorRGB {

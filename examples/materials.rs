@@ -2,10 +2,10 @@ use std::rc::Rc;
 use yarrr::prelude::*;
 
 fn create_scene() -> HittableScene {
-    let m_right = Rc::new(Material::Metal(ColorRGB::new(0.8, 0.8, 0.8), 0.2));
-    let m_left = Rc::new(Material::Dielectric(1.5));
-    let m_center = Rc::new(Material::Lambertan(ColorRGB::new(0.2, 0.1, 0.9)));
-    let m_ground = Rc::new(Material::Lambertan(ColorRGB::new(0.2, 0.9, 0.4)));
+    let m_right = Material::Metal(ColorRGB::new(0.8, 0.8, 0.8), 0.2);
+    let m_left = Material::Dielectric(1.5);
+    let m_center = Material::Lambertan(ColorRGB::new(0.2, 0.1, 0.9));
+    let m_ground = Material::Lambertan(ColorRGB::new(0.2, 0.9, 0.4));
 
     let mut scene = HittableScene::new();
     scene.add(Rc::new(Sphere::new(
@@ -55,6 +55,6 @@ fn main() {
         samples_per_px: 100,
         bounce_depth: 5,
     };
-    color_image(&mut im, cam, &scene, settings);
+    color_image(&mut im, cam, scene, settings);
     print_ppm(&im);
 }

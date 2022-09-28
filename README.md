@@ -26,28 +26,28 @@ cargo run --release --job job.yaml --output render.jpeg
 
 ![](/doc/final_render_1200.jpeg)
 
-- [x] vector math in 3D
-- [ ] output
+- [x] core
+  - [x] vector math in 3D
+  - [x] rays
+    - [x] intersection with sphere
+    - [x] antialiasing
+    - [x] multiple bounce
+    - [x] diffuse scattering
+    - [x] reflection
+    - [x] refraction
+  - [x] scene with spheres
+  - [x] adding sphere objects
+  - [x] materials
+  - [x] camera with arbitrary coordinate system 
+- [ ] infrastructure
   - [x] basic PPM image format writer
-  - [ ] custom buffer writter https://docs.rs/image/latest/image/fn.save_buffer.html
   - [x] loading bar
-- [x] rays
-  - [x] intersection with sphere
-  - [x] antialiasing
-  - [x] multiple bounce
-  - [x] diffuse scattering
-  - [x] reflection
-  - [x] refraction
-- [x] scene with spheres
-- [x] adding sphere objects
-- [x] materials
-- [x] camera with arbitrary coordinate system
-- [ ] input
-  - [ ] simle CLI to control output image parameters
+  - [ ] custom buffer writter https://docs.rs/image/latest/image/fn.save_buffer.html
+  - [ ] simple CLI to control output image parameters
   - [ ] scene builder config from json or yaml with `serde`
   - [ ] example to generate scene `json` file
-- [x] refactor unit tests from `tests` to coresponding modules
-- [ ] performance optimization
-  - [x] benches for hot paths
+- [ ] examples
+- [ ] performance
   - [ ] profiling with perf and flamegraph
-  - [ ] figure out the artifact
+  - [x] benches for hot paths
+  - [ ] parallelize the per pixel operations

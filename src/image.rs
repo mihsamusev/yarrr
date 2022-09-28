@@ -49,6 +49,20 @@ impl Image {
         let v = (j as f32 + rng.gen_range(0.0..1.0)) / (self.height - 1) as f32;
         (u, v)
     }
+
+    pub fn as_bytes(&self) -> Vec<u8> {
+        self.buffer
+            .iter()
+            .flat_map(|color| {
+                [
+                    (255.999 * color.x) as u8,
+                    (255.999 * color.y) as u8,
+                    (255.999 * color.z) as u8,
+                ]
+                .into_iter()
+            })
+            .collect::<Vec<u8>>()
+    }
 }
 
 pub fn print_ppm(image: &Image) {

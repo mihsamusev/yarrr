@@ -12,9 +12,14 @@ Study exercise in rewriting the famous [Ray Tracing in One Weekend by Peter Shir
 - have fun and show it to my mum when im done
 
 ## Getting started
-
+Run one of the examples
 ```sh
 cargo run --release --example final_render > render.ppm
+```
+
+Alternatively run a custom job
+```sh
+cargo run --release --job job.yaml --output render.jpeg
 ```
 
 ## Progress
@@ -22,8 +27,10 @@ cargo run --release --example final_render > render.ppm
 ![](/doc/final_render_1200.jpeg)
 
 - [x] vector math in 3D
-- [x] basic PPM image format writer
-  - [ ] loading bar
+- [ ] output
+  - [x] basic PPM image format writer
+  - [ ] custom buffer writter https://docs.rs/image/latest/image/fn.save_buffer.html
+  - [x] loading bar
 - [x] rays
   - [x] intersection with sphere
   - [x] antialiasing
@@ -35,11 +42,12 @@ cargo run --release --example final_render > render.ppm
 - [x] adding sphere objects
 - [x] materials
 - [x] camera with arbitrary coordinate system
-- [ ] simle CLI to control output image parameters
-- [ ] scene builder config from json or yaml with `serde`
-  - [ ] example to generate scene `yaml` file
-- [ ] refactor unit tests from `tests` to coresponding modules
+- [ ] input
+  - [ ] simle CLI to control output image parameters
+  - [ ] scene builder config from json or yaml with `serde`
+  - [ ] example to generate scene `json` file
+- [x] refactor unit tests from `tests` to coresponding modules
 - [ ] performance optimization
-  - [ ] benches for hot paths
+  - [x] benches for hot paths
   - [ ] profiling with perf and flamegraph
   - [ ] figure out the artifact

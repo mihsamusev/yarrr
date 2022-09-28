@@ -65,9 +65,7 @@ fn criterion_benchmark(c: &mut Criterion) {
     c.bench_function("unit sphere sample", |b| b.iter(unit_sphere_sample));
     c.bench_function("hit 1 sphere", |b| b.iter(hit_one_sphere));
     c.bench_function("hit n spheres", |b| b.iter(|| hit_n_spheres(black_box(5))));
-    c.bench_function("lambertan scatter", |b| {
-        b.iter(lambertian_material_scatter)
-    });
+    c.bench_function("lambertan scatter", |b| b.iter(lambertian_material_scatter));
     c.bench_function("metal scatter", |b| b.iter(metal_material_scatter));
     c.bench_function("dielectric_scatter", |b| {
         b.iter(dielectric_material_scatter)

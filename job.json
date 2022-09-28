@@ -1,0 +1,32 @@
+{
+  "camera": {
+    "origin": [0.0, 0.0, 0.0],
+    "lookat": [0.0, 0.0, 0.0],
+    "vup": [0.0, 0.0, 0.0],
+    "vfov": 20.0,
+    "aspect_ratio": 1.5
+  },
+  "image": {
+    "width": 1200,
+    "height": 800
+  },
+  "scene": [
+    {
+      "sphere": {
+        "center": [0.0, 0.0, 0.0],
+        "radius": 0.5,
+        "material": "lambertan"
+      }
+    },
+    {
+      "sphere": {
+        "center": [0.0, 0.0, 0.0],
+        "radius": 0.5,
+        "material": "lambertan"
+      }
+    }
+  ],
+  "renderer": {
+    "samples_per_px": 100
+  }
+}

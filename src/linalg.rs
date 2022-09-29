@@ -3,6 +3,8 @@ use rand::distributions::{Distribution, Uniform};
 use std::f32::consts::PI;
 use std::ops;
 
+/// Primitive for 3D geometry
+///
 #[derive(
     Debug, Copy, Clone, PartialEq, PartialOrd, Default, Add, AddAssign, Sub, SubAssign, Neg, Div,
 )]
@@ -172,8 +174,9 @@ impl Vector3D {
         Self { x, y, z }
     }
 
-    // random vector in a unit cube between
-    // min and max coordinates for each axis
+    /// random vector in a unit cube between
+    /// min and max coordinates for each axis
+    ///
     pub fn random(min: f32, max: f32) -> Self {
         let mut rng = rand::thread_rng();
         let range = Uniform::from(min..max);
@@ -182,15 +185,6 @@ impl Vector3D {
             x: range.sample(&mut rng),
             y: range.sample(&mut rng),
             z: range.sample(&mut rng),
-        }
-    }
-
-    pub fn unit_sphere_sample_0() -> Self {
-        loop {
-            let v = Vector3D::random(-1.0, 1.0);
-            if v.norm_squared() < 1.0 {
-                return v;
-            }
         }
     }
 
@@ -275,11 +269,15 @@ impl Vector3D {
     }
 }
 
-// normal vec is unit
+/// produce a reflected ray between vector and a normal vector
+/// normal vector is assumed to be unit
+///
 pub fn reflect(vec: &Vector3D, normal: &Vector3D) -> Vector3D {
     vec - 2.0 * normal * vec.dot(normal)
 }
 
+/// produce a refracted ray between vector and normal vector
+///
 pub fn refract(vec: &Vector3D, normal: &Vector3D, refraction_index: f32) -> Vector3D {
     let cos_theta_incoming = (-vec).dot(normal).min(1.0);
     let r_out_perp = refraction_index * (vec + cos_theta_incoming * normal);
@@ -288,6 +286,9 @@ pub fn refract(vec: &Vector3D, normal: &Vector3D, refraction_index: f32) -> Vect
 }
 
 #[inline]
+/// shlick refraction index approximation for reflectivity that varies with angle
+/// https://raytracing.github.io/books/RayTracingInOneWeekend.html#dielectrics/schlickapproximation
+///
 pub fn shlick_reflectance(cos_theta: f32, refraction_index: f32) -> f32 {
     let r0 = (1.0 - refraction_index) / (1.0 + refraction_index);
     r0 * r0 + (1.0 - r0 * r0) * (1.0 - cos_theta).powi(5)

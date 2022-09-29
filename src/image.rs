@@ -1,8 +1,12 @@
 use crate::prelude::*;
 use rand::distributions::{Distribution, Uniform};
 
+/// type for a RGB pixel
+///
 pub type ColorRGB = Vector3D;
 
+/// Container for image buffer
+///
 pub struct Image {
     pub width: u32,
     pub height: u32,
@@ -19,26 +23,38 @@ impl Image {
         }
     }
 
+    /// return image dimentions
+    ///
     pub fn dims(&self) -> (u32, u32) {
         (self.width, self.height)
     }
 
+    /// get a color information at i,j pixel location
+    ///
     pub fn at(&self, i: u32, j: u32) -> ColorRGB {
         let idx = (j * self.width + i) as usize;
         self.buffer[idx]
     }
 
+    /// set the color to i,j pixel location
+    ///
     pub fn set_at(&mut self, i: u32, j: u32, color: ColorRGB) {
         let idx = (j * self.width + i) as usize;
         self.buffer[idx] = color;
     }
 
+    /// get u, v normalized coordinates corresponding to
+    /// pixel location i, j
+    ///
     pub fn pixel_to_uv(&self, i: u32, j: u32) -> (f32, f32) {
         let u = i as f32 / (self.width - 1) as f32;
         let v = j as f32 / (self.height - 1) as f32;
         (u, v)
     }
 
+    /// get u, v normalized coordinates corresponding to
+    /// pixel location i, j with uniformly distributed unit error
+    ///
     pub fn pixel_to_uv_noisy(&self, i: u32, j: u32) -> (f32, f32) {
         let mut rng = rand::thread_rng();
         let range = Uniform::from(0.0..1.0);
@@ -47,6 +63,8 @@ impl Image {
         (u, v)
     }
 
+    /// convert image buffer to the vector of bytes
+    ///
     pub fn as_bytes(&self) -> Vec<u8> {
         self.buffer
             .iter()

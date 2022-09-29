@@ -1,6 +1,9 @@
 use crate::prelude::*;
 use std::rc::Rc;
 
+/// Container for simplest hittable object
+/// sphere with a material
+///
 pub struct Sphere {
     pub center: Vector3D,
     pub radius: f32,
@@ -18,6 +21,9 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
+    /// hitting a single sphere can be solved in constant time
+    /// solving a quadratic equation
+    ///
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         let sphere_dir = ray.origin - self.center;
         // components of quadratic eq
@@ -45,6 +51,8 @@ impl Hittable for Sphere {
     }
 }
 
+/// Container for a collection of various hittable objects
+///
 pub struct HittableScene {
     bodies: Vec<Rc<dyn Hittable + 'static>>,
 }
@@ -66,6 +74,9 @@ impl Default for HittableScene {
 }
 
 impl Hittable for HittableScene {
+    /// Naive implementation will find an intersection in O(N) time
+    /// where N is object count
+    ///
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         let mut record = None;
         let mut t_closest = t_max;
@@ -79,6 +90,8 @@ impl Hittable for HittableScene {
     }
 }
 
+/// Container for a scene containing only spheres
+///
 pub struct SphereScene {
     bodies: Vec<Sphere>,
 }

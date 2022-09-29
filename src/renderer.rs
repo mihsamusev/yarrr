@@ -1,6 +1,8 @@
 use crate::prelude::*;
 use indicatif::{ProgressBar, ProgressStyle};
 
+/// Converts RGB in range 0.0-1.0 to string with 0-255
+///
 fn to_string(vec: &ColorRGB) -> String {
     let r = (255.999 * vec.x) as u32;
     let g = (255.999 * vec.y) as u32;
@@ -8,6 +10,9 @@ fn to_string(vec: &ColorRGB) -> String {
     format!("{} {} {} ", r, g, b)
 }
 
+/// Generates a string corresponding to PPM image format
+/// https://raytracing.github.io/books/RayTracingInOneWeekend.html#outputanimage/theppmimageformat
+///
 pub fn print_ppm(image: &Image) {
     println!("P3\n{} {}\n255", image.width, image.height);
 
@@ -20,11 +25,17 @@ pub fn print_ppm(image: &Image) {
     }
 }
 
+/// Container for the renderer settings
+///
 pub struct RenderSettings {
     pub samples_per_px: u32,
     pub bounce_depth: u32,
 }
 
+/// Recursively sample bounces off the world objects and
+/// accumulate them as the color for the pixel that the ray
+/// is shot through
+///
 pub fn collect_color<T>(ray: &Ray, world: &T, depth: u32) -> ColorRGB
 where
     T: Hittable + 'static,
@@ -48,6 +59,9 @@ where
     }
 }
 
+/// Shoot a ray through every image pixel from the camera and accumulate
+/// their colors into an image
+///
 pub fn color_image<T>(image: &mut Image, camera: impl Camera, world: T, settings: RenderSettings)
 where
     T: Hittable + 'static,
@@ -70,7 +84,7 @@ where
                 // decide on color depending on the world properties
                 color += collect_color(&ray, &world, settings.bounce_depth);
             }
-            color = clamp_color(color, settings.samples_per_px);
+            color = correct_gamma(color, settings.samples_per_px);
             image.set_at(i, j, color);
         }
 
@@ -80,9 +94,10 @@ where
     bar.finish();
 }
 
-fn clamp_color(color: ColorRGB, samples_per_px: u32) -> ColorRGB {
-    // gamma=2.0 correcting + clamping
-    // https://raytracing.github.io/books/RayTracingInOneWeekend.html#diffusematerials/usinggammacorrectionforaccuratecolorintensity
+// Apply gamma=2.0 correction + ensure the color values dont go outside the bounds
+// https://raytracing.github.io/books/RayTracingInOneWeekend.html#diffusematerials/usinggammacorrectionforaccuratecolorintensity
+//
+fn correct_gamma(color: ColorRGB, samples_per_px: u32) -> ColorRGB {
     let scale = 1.0 / samples_per_px as f32;
     ColorRGB {
         x: (scale * color.x).sqrt().clamp(0.0, 0.999),

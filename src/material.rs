@@ -1,19 +1,30 @@
 use crate::prelude::*;
 use rand::Rng;
 
+/// Structure describing reflected / refracted ray
+///
 pub struct HitBounce {
     pub ray: Ray,
     pub attenuation: ColorRGB,
 }
 
+/// trait for all materials that can produce a HitBounce
+/// on their body intersection with a ray
+///
 pub trait Scatter {
     fn scatter(ray: &Ray, hit: &HitRecord) -> Option<HitBounce>;
 }
 
+/// Enumeration of basic mateirials
+///
 pub enum Material {
+    /// 100% reflects normal with gray color
     None,
+    /// 100% reflects fully diffuse ray with albedo color
     Lambertan(ColorRGB),
+    /// 100% reflects normal + in a fuzzyway ray with albedo color
     Metal(ColorRGB, f32),
+    /// depending on the cangle can relfect and refract
     Dielectric(f32),
 }
 

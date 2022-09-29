@@ -1,5 +1,8 @@
 use crate::prelude::*;
 
+/// container for image view port which is a plane focal length away from
+/// the camera origin that the rays are shoot through
+///
 pub struct Viewport {
     pub width: f32,
     pub height: f32,
@@ -12,10 +15,16 @@ impl Viewport {
     }
 }
 
+/// common trait for all cameras that can be used in
+/// the rendering
+///
 pub trait Camera {
     fn ray_from_uv(&self, u: f32, v: f32) -> Ray;
 }
 
+/// simple axis alligned camera at origin
+/// pointing towards -Z direction
+///
 pub struct SimpleCamera {
     pub origin: Vector3D,
     pub viewport: Viewport,
@@ -45,6 +54,8 @@ impl Camera for SimpleCamera {
     }
 }
 
+/// field of view camera at origin
+///
 pub struct FovCamera {
     origin: Vector3D,
     pub vfow: f32,

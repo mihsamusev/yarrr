@@ -1,5 +1,7 @@
 use crate::prelude::*;
 
+/// Ray primitive with origin and direction
+///
 #[derive(Debug)]
 pub struct Ray {
     pub origin: Vector3D,
@@ -14,12 +16,16 @@ impl Ray {
         }
     }
 
+    /// Ray primitive with origin and direction
+    ///
     #[inline]
     pub fn at(&self, t: f32) -> Vector3D {
         self.origin + self.direction * t
     }
 }
 
+/// Structure that describes ray to body intersection
+///
 pub struct HitRecord<'a> {
     pub point: Vector3D,
     pub t: f32,
@@ -40,6 +46,9 @@ impl<'a> HitRecord<'a> {
     }
 
     #[inline]
+    /// Figure out wether we hit the front facing side of a body
+    /// (normal towards ray) and flip the normal in case of back side
+    ///
     pub fn set_ray_facing_normal(&mut self, ray: &Ray) {
         self.is_front_face = ray.direction.dot(&self.normal) < 0.0;
         if !self.is_front_face {
@@ -48,6 +57,9 @@ impl<'a> HitRecord<'a> {
     }
 }
 
+/// trait for all bodies that can be potentially hit by ray and produce
+/// the hit record
+///
 pub trait Hittable {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord>;
 }

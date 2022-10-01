@@ -9,25 +9,18 @@ Study exercise in rewriting the famous [Ray Tracing in One Weekend by Peter Shir
 - not looking at other numerous Rust implementations until im done with first complete implementaton
 - not using 3rd party linear algebra libraries until im done with first complete implementaton
 - practice writting organizing rust modules, writing tests and using CI like it was a production ready tool
-- have fun and show it to my mum when im done
 
 ## Getting started
 
 Run one of the examples
 
 ```sh
-cargo run --release --example final_render > render.ppm
+cargo run --release --example final_render
 ```
 
-Alternatively run a custom job
+![](/doc/final_render_1600_1.jpeg)
 
-```sh
-cargo run --release --job job.yaml --output render.jpeg
-```
-
-## Progress
-
-![](/doc/final_render_1200.jpeg)
+## Todos
 
 - [x] core
   - [x] vector math in 3D
@@ -49,8 +42,8 @@ cargo run --release --job job.yaml --output render.jpeg
   - [ ] simple CLI to control output image parameters
   - [ ] scene builder config from json or yaml with `serde`
   - [ ] example to generate scene `json` file
-- [ ] examples
+- [x] examples
 - [ ] performance
-  - [ ] profiling with perf and flamegraph
+  - [x] profiling with perf and flamegraph
   - [x] benches for hot paths
   - [ ] parallelize the per pixel operations

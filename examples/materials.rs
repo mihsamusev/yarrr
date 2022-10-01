@@ -1,50 +1,34 @@
-use std::rc::Rc;
 use yarrr::prelude::*;
 
-fn create_scene() -> HittableScene {
+fn create_scene() -> SphereScene {
     let m_right = Material::Metal(ColorRGB::new(0.8, 0.8, 0.8), 0.2);
-    let m_left = Material::Dielectric(1.5);
+    let m_left = Material::Metal(ColorRGB::new(0.8, 0.0, 0.4), 0.0);
     let m_center = Material::Lambertan(ColorRGB::new(0.2, 0.1, 0.9));
     let m_ground = Material::Lambertan(ColorRGB::new(0.2, 0.9, 0.4));
 
-    let mut scene = HittableScene::new();
-    scene.add(Rc::new(Sphere::new(
-        Vector3D::new(-1.0, -0.0, -1.0),
-        0.5,
-        m_left,
-    )));
-
-    scene.add(Rc::new(Sphere::new(
-        Vector3D::new(1.0, 0.0, -1.0),
-        0.5,
-        m_right,
-    )));
-
-    scene.add(Rc::new(Sphere::new(
-        Vector3D::new(0.0, 0.0, -1.0),
-        0.5,
-        m_center,
-    )));
-
-    scene.add(Rc::new(Sphere::new(
+    let mut scene = SphereScene::new();
+    scene.add(Sphere::new(Vector3D::new(-1.0, -0.0, -1.0), 0.5, m_left));
+    scene.add(Sphere::new(Vector3D::new(1.0, 0.0, -1.0), 0.5, m_right));
+    scene.add(Sphere::new(Vector3D::new(0.0, 0.0, -1.0), 0.5, m_center));
+    scene.add(Sphere::new(
         Vector3D::new(0.0, -100.5, -1.0),
         100.0,
         m_ground,
-    )));
+    ));
     scene
 }
 
 fn main() {
+    // image
     let aspect_ratio = 16.0 / 9.0;
-    //let height = 400;
-    //let width = ((height as f32) * aspect_ratio) as u32;
-    let width = 800;
+    let width = 1600;
     let height = (width as f32 / aspect_ratio) as u32;
     let mut im = Image::new(width, height);
 
+    // camera
     let vp = Viewport::new(2.0, aspect_ratio);
     let focal_length = 1.0;
-    let cam_origin = Vector3D::default();
+    let cam_origin = Vector3D::zero();
     let cam = SimpleCamera::new(vp, focal_length, cam_origin);
 
     // scene
@@ -56,5 +40,14 @@ fn main() {
         bounce_depth: 5,
     };
     color_image(&mut im, cam, scene, settings);
-    print_ppm(&im);
+
+    // save results
+    image::save_buffer(
+        "materials.jpeg",
+        &im.as_bytes(),
+        im.width,
+        im.height,
+        image::ColorType::Rgb8,
+    )
+    .expect("Unable to save image");
 }

@@ -14,7 +14,7 @@ pub struct Vector3D {
 
 impl ops::Index<usize> for Vector3D {
     type Output = f32;
-    #[inline]
+
     fn index(&self, index: usize) -> &Self::Output {
         match index {
             0 => &self.x,
@@ -85,7 +85,7 @@ impl<'a> ops::Sub<Vector3D> for &'a Vector3D {
 
 impl ops::Mul<f32> for Vector3D {
     type Output = Self;
-    #[inline]
+
     fn mul(self, rhs: f32) -> Self::Output {
         Self {
             x: rhs * self.x,
@@ -108,7 +108,7 @@ impl<'a> ops::Mul<f32> for &'a Vector3D {
 
 impl ops::Mul<Vector3D> for f32 {
     type Output = Vector3D;
-    #[inline]
+
     fn mul(self, rhs: Vector3D) -> Self::Output {
         rhs * self
     }
@@ -116,7 +116,7 @@ impl ops::Mul<Vector3D> for f32 {
 
 impl<'a> ops::Mul<&'a Vector3D> for f32 {
     type Output = Vector3D;
-    #[inline]
+
     fn mul(self, rhs: &'a Vector3D) -> Self::Output {
         rhs * self
     }
@@ -124,7 +124,7 @@ impl<'a> ops::Mul<&'a Vector3D> for f32 {
 
 impl ops::Mul<Vector3D> for Vector3D {
     type Output = Self;
-    #[inline]
+
     fn mul(self, rhs: Vector3D) -> Self::Output {
         Self {
             x: self.x * rhs.x,
@@ -136,7 +136,7 @@ impl ops::Mul<Vector3D> for Vector3D {
 
 impl<'a> ops::Mul<&'a Vector3D> for Vector3D {
     type Output = Vector3D;
-    #[inline]
+
     fn mul(self, rhs: &'a Vector3D) -> Self::Output {
         Vector3D {
             x: self.x * rhs.x,
@@ -148,7 +148,7 @@ impl<'a> ops::Mul<&'a Vector3D> for Vector3D {
 
 impl<'a> ops::Mul<Vector3D> for &'a Vector3D {
     type Output = Vector3D;
-    #[inline]
+
     fn mul(self, rhs: Vector3D) -> Self::Output {
         Vector3D {
             x: self.x * rhs.x,
@@ -159,7 +159,6 @@ impl<'a> ops::Mul<Vector3D> for &'a Vector3D {
 }
 
 impl ops::MulAssign<f32> for Vector3D {
-    #[inline]
     fn mul_assign(&mut self, rhs: f32) {
         self.x *= rhs;
         self.y *= rhs;
@@ -172,8 +171,6 @@ impl Vector3D {
         Self { x, y, z }
     }
 
-    // random vector in a unit cube between
-    // min and max coordinates for each axis
     pub fn random(min: f32, max: f32) -> Self {
         let mut rng = rand::thread_rng();
         let range = Uniform::from(min..max);
@@ -208,12 +205,10 @@ impl Vector3D {
         Vector3D { x, y, z }
     }
 
-    #[inline]
     pub fn norm(&self) -> f32 {
         self.norm_squared().sqrt()
     }
 
-    #[inline]
     pub fn norm_squared(&self) -> f32 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
@@ -222,18 +217,15 @@ impl Vector3D {
         self.norm() < 10e-8
     }
 
-    #[inline]
     pub fn unit(self) -> Self {
         let scale = 1.0 / self.norm();
         self * scale
     }
 
-    #[inline]
     pub fn dot(&self, other: &Self) -> f32 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
-    #[inline]
     pub fn cross(&self, other: &Self) -> Self {
         Self {
             x: self.y * other.z - self.z * other.y,
@@ -275,7 +267,6 @@ impl Vector3D {
     }
 }
 
-// normal vec is unit
 pub fn reflect(vec: &Vector3D, normal: &Vector3D) -> Vector3D {
     vec - 2.0 * normal * vec.dot(normal)
 }
@@ -287,7 +278,6 @@ pub fn refract(vec: &Vector3D, normal: &Vector3D, refraction_index: f32) -> Vect
     r_out_perp + r_out_para
 }
 
-#[inline]
 pub fn shlick_reflectance(cos_theta: f32, refraction_index: f32) -> f32 {
     let r0 = (1.0 - refraction_index) / (1.0 + refraction_index);
     r0 * r0 + (1.0 - r0 * r0) * (1.0 - cos_theta).powi(5)

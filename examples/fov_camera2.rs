@@ -44,5 +44,13 @@ fn main() {
         bounce_depth: 5,
     };
     color_image(&mut im, cam, scene, settings);
-    print_ppm(&im);
+
+    image::save_buffer(
+        "doc/fov_cam_1600.jpeg",
+        &im.as_bytes(),
+        im.width,
+        im.height,
+        image::ColorType::Rgb8,
+    )
+    .expect("Ünable to save image");
 }

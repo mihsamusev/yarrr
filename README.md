@@ -19,12 +19,6 @@ Run one of the examples
 cargo run --release --example final_render > render.ppm
 ```
 
-Alternatively run a custom job
-
-```sh
-cargo run --release --job job.yaml --output render.jpeg
-```
-
 ## Progress
 
 ![](/doc/final_render_1200.jpeg)
@@ -49,8 +43,8 @@ cargo run --release --job job.yaml --output render.jpeg
   - [ ] simple CLI to control output image parameters
   - [ ] scene builder config from json or yaml with `serde`
   - [ ] example to generate scene `json` file
-- [ ] examples
+- [x] examples
 - [ ] performance
-  - [ ] profiling with perf and flamegraph
+  - [x] profiling with perf and flamegraph
   - [x] benches for hot paths
   - [ ] parallelize the per pixel operations

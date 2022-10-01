@@ -84,7 +84,7 @@ fn main() {
     // print_ppm(&im);
 
     image::save_buffer(
-        "doc/final_render.jpeg",
+        "doc/final_render_1600_2.jpeg",
         &im.as_bytes(),
         im.width,
         im.height,
